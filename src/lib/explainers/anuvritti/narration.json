@@ -1,0 +1,9 @@
+{
+	"gap": "Pāṇini almost never repeats a word. Look at sūtra 6.1.78: the एच् vowels become अय्, अव्, आय्, आव्. But when does that happen? The sūtra doesn't say. Tap the question mark.",
+	"flow": "The missing word is just upstairs. Sūtra 6.1.77 ends with अचि, when a vowel follows. That word keeps flowing down into the sūtras below it. This is called anuvṛtti. Tap अचि to send it down.",
+	"river": "अचि flows into twenty-eight later sūtras and then stops, once it is no longer needed. Here is the stretch of chapter six it runs through. Tap any sūtra to see everything it inherits.",
+	"headings": "Some sūtras are pure headings, called adhikāras. Their words govern a whole block. प्रत्ययः, affix, at 3.1.1 rules over more than eighteen hundred sūtras. Pick a heading to see how far it reaches.",
+	"assemble": "Now put it all together. Sūtra 3.1.68, कर्तरि शप्, is just two words. Build its full reading step by step: its own words, then inherited words, then the headings above it.",
+	"code": "If you write code, this will feel familiar. A heading works like a block that sets context, and anuvṛtti is like a value that stays in scope until it is no longer used. The analogy is loose, but it helps.",
+	"quiz": "One last check, then a summary to keep."
+}

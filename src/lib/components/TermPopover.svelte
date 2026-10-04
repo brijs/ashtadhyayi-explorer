@@ -47,7 +47,7 @@
 					{#each term.letters as l, i (i)}<span class="letter deva">{l}</span>{/each}
 				</span>
 				{#if term.kind === 'pratyahara'}
-					<a class="tool" href={resolve('/tools') + '/pratyahara/#' + encodeURIComponent(term.key)}>See it on the Śiva sūtras →</a>
+					<a class="tool" href={resolve('/tools/pratyahara') + '/#' + encodeURIComponent(term.key)}>See it on the Śiva sūtras →</a>
 				{/if}
 			{/if}
 			{#if term.en}<span class="en">{term.en}</span>{/if}

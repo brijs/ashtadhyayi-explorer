@@ -11,9 +11,9 @@ export type Lesson = {
 };
 
 export const EXPLAINERS: Lesson[] = [
-	{ slug: 'shiva-sutras', title: 'Śiva sūtras & pratyāhāras', sa: 'माहेश्वरसूत्राणि', blurb: '14 lines of sounds and a trick that turns any stretch of them into a two-letter name.', sutras: ['1.3.3', '1.3.9', '1.1.71', '1.1.69'], status: 'soon' },
-	{ slug: 'anatomy', title: 'Anatomy of a sūtra', sa: 'सूत्रस्य अङ्गानि', blurb: 'Case endings as operators: how इको यणचि packs a whole rewrite rule into three words.', sutras: ['6.1.77', '1.1.49', '1.1.66', '1.1.67'], status: 'soon' },
-	{ slug: 'anuvritti', title: 'Anuvṛtti & adhikāra', sa: 'अनुवृत्तिः अधिकारश्च', blurb: 'Words that flow down into later rules, and headings that scope whole chapters.', sutras: ['1.3.11', '3.1.1', '3.1.2', '6.1.72'], status: 'soon' },
+	{ slug: 'shiva-sutras', title: 'Śiva sūtras & pratyāhāras', sa: 'माहेश्वरसूत्राणि', blurb: '14 lines of sounds and a trick that turns any stretch of them into a two-letter name.', sutras: ['1.3.3', '1.3.9', '1.1.71', '1.1.69'], status: 'ready', minutes: 8 },
+	{ slug: 'anatomy', title: 'Anatomy of a sūtra', sa: 'सूत्रस्य अङ्गानि', blurb: 'Case endings as operators: how इको यणचि packs a whole rewrite rule into three words.', sutras: ['6.1.77', '1.1.49', '1.1.66', '1.1.67'], status: 'ready', minutes: 8 },
+	{ slug: 'anuvritti', title: 'Anuvṛtti & adhikāra', sa: 'अनुवृत्तिः अधिकारश्च', blurb: 'Words that flow down into later rules, and headings that scope whole chapters.', sutras: ['1.3.11', '3.1.1', '3.1.2', '6.1.72'], status: 'ready', minutes: 8 },
 	{ slug: 'it-markers', title: 'It-markers', sa: 'इत्संज्ञा', blurb: 'Tags attached to affixes and roots that switch rules on, then vanish.', sutras: ['1.3.2', '1.3.3', '1.3.9'], status: 'soon' },
 	{ slug: 'nearest-substitute', title: 'The nearest substitute', sa: 'स्थानेऽन्तरतमः', blurb: 'Which y, v, r or l replaces which vowel? Nearest match on a map of the mouth.', sutras: ['1.1.50'], status: 'soon' },
 	{ slug: 'sutra-types', title: 'Six kinds of sūtra', sa: 'सूत्रप्रकाराः', blurb: 'Definitions, meta-rules, operations, restrictions, extensions and headings.', sutras: ['1.1.1', '1.1.49', '6.1.77'], status: 'soon' },
@@ -32,7 +32,7 @@ export const CS_LESSONS: Lesson[] = [
 ];
 
 export const TOOLS: Lesson[] = [
-	{ slug: 'pratyahara', title: 'Pratyāhāra calculator', sa: 'प्रत्याहारः', blurb: 'Pick a start sound and a marker; see the class light up on the Śiva sūtras.', sutras: ['1.1.71'], status: 'soon' },
+	{ slug: 'pratyahara', title: 'Pratyāhāra calculator', sa: 'प्रत्याहारः', blurb: 'Pick a start sound and a marker; see the class light up on the Śiva sūtras.', sutras: ['1.1.71'], status: 'ready' },
 	{ slug: 'prakriya', title: 'Derivation debugger', sa: 'प्रक्रिया', blurb: 'Step through real word derivations; every step links to the sūtra that fired.', sutras: [], status: 'soon' },
 	{ slug: 'sandhi', title: 'Sandhi playground', sa: 'सन्धिः', blurb: 'Join two words and see which sūtras apply.', sutras: ['6.1.77', '6.1.87', '6.1.101'], status: 'soon' }
 ];

@@ -1,0 +1,29 @@
+{
+	"anatomy": {
+		"split": "audio/anatomy/split.1d3212f9.mp3",
+		"cases": "audio/anatomy/cases.99326227.mp3",
+		"operators": "audio/anatomy/operators.82f79452.mp3",
+		"direction": "audio/anatomy/direction.881cbc6b.mp3",
+		"run": "audio/anatomy/run.694e3dbb.mp3",
+		"nearest": "audio/anatomy/nearest.fe00317b.mp3",
+		"quiz": "audio/anatomy/quiz.ee6c05dd.mp3"
+	},
+	"anuvritti": {
+		"gap": "audio/anuvritti/gap.8256d26d.mp3",
+		"flow": "audio/anuvritti/flow.59ae150e.mp3",
+		"river": "audio/anuvritti/river.960f6c73.mp3",
+		"headings": "audio/anuvritti/headings.a6d4bc34.mp3",
+		"assemble": "audio/anuvritti/assemble.2ff1d415.mp3",
+		"code": "audio/anuvritti/code.95bdd567.mp3",
+		"quiz": "audio/anuvritti/quiz.7343133a.mp3"
+	},
+	"shiva-sutras": {
+		"welcome": "audio/shiva-sutras/welcome.f22b5f0f.mp3",
+		"order": "audio/shiva-sutras/order.daa49408.mp3",
+		"markers": "audio/shiva-sutras/markers.6dc3ab76.mp3",
+		"rule": "audio/shiva-sutras/rule.28836987.mp3",
+		"play": "audio/shiva-sutras/play.7e1d1d9a.mp3",
+		"iko-yanaci": "audio/shiva-sutras/iko-yanaci.f5942b40.mp3",
+		"quiz": "audio/shiva-sutras/quiz.df51736b.mp3"
+	}
+}

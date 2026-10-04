@@ -28,9 +28,17 @@ type RawSutra = {
 const raw: RawSutra[] = load('sutraani_data.txt').data;
 const sutrartha: Record<string, string> = load('sutraani_sutrartha_english.txt');
 const vasuSummary: Record<string, string> = load('sutraani_vasu_english_summary.txt');
+// Short English is shown as plain text: unwrap <<quoted sūtras>> and [[x.y.z]] references.
+const plainText = (t: string) =>
+	t
+		.replace(/<<(.+?)>>/g, '$1')
+		.replace(/\[\[([0-9०-९.]+)\]\]/g, (_, r) => `(${asciiDigits(r)})`)
+		.replace(/<[^>]+>/g, '')
+		.replace(/\s+/g, ' ')
+		.trim();
 // sutrartha_english is cleaner but covers ~840 sūtras; Vasu's summary covers all.
 const enShort: Record<string, string> = Object.fromEntries(
-	Object.keys(vasuSummary).map((k) => [k, (sutrartha[k]?.trim() || vasuSummary[k]?.trim() || '').replace(/।$/, '.')])
+	Object.keys(vasuSummary).map((k) => [k, plainText(sutrartha[k]?.trim() || vasuSummary[k]?.trim() || '').replace(/।$/, '.')])
 );
 const vasuFull: Record<string, string> = load('sutraani_vasu_english.txt');
 const kashika: Record<string, string> = load('sutraani_kashika.txt');

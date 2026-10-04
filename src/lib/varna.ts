@@ -106,3 +106,16 @@ export function splitPratyaharaName(name: string): [string, string] | null {
 	const first = vs[0];
 	return [first, it];
 }
+
+/** Slot indices of the letters (not markers) from slot `start` up to marker slot `end`. */
+export function rangeSlots(start: number, end: number): number[] {
+	const out: number[] = [];
+	for (let i = start; i < end; i++) if (!SHIVA_FLAT[i].isIt) out.push(i);
+	return out;
+}
+
+/** Name of the pratyāhāra from letter slot `start` and marker slot `end`, e.g. अ + च् → अच्, ह + ल् → हल्. */
+export function pratyaharaName(start: number, end: number): string {
+	const first = SHIVA_FLAT[start].varna;
+	return (isConsonant(first) ? first[0] : first) + SHIVA_FLAT[end].varna;
+}

@@ -1,0 +1,9 @@
+{
+	"split": "Here is a whole rule of sandhi in just three words: इको यणचि. It looks like one long word because its parts have fused together. Tap the sūtra to pull its words apart.",
+	"cases": "Each word wears a case ending, just like in any Sanskrit sentence. One is in the sixth case, one in the first, one in the seventh. Tap each word to reveal its case.",
+	"operators": "In Pāṇini's rules the cases do technical jobs. The sixth case means in place of, by sūtra 1.1.49. The seventh means when this follows, by 1.1.66. Tap a word, then tap the slot where it belongs.",
+	"direction": "The seventh and fifth cases point in opposite directions. With the seventh, the sound before the trigger changes. With the fifth, by 1.1.67, the sound after it changes. Flip the switch and watch which side moves.",
+	"run": "Now let's run the rule like a machine. Pick a pair of words. The cursor checks each sound: is it an इक्, and does a vowel come next? Try the tricky ones too. Sometimes a more specific rule steps in.",
+	"nearest": "Why does इ become य and not व? By sūtra 1.1.50, the substitute is the nearest match, made at the same place in the mouth. Match each vowel to its semivowel.",
+	"quiz": "Four questions to lock it in, then a summary card of the three case conventions."
+}

@@ -109,6 +109,95 @@ for (const [label, viewport] of [['desktop', { width: 1280, height: 800 }], ['mo
 	});
 }
 
+// Explainers: walk every scene, exercise one interaction, screenshot some.
+const SHOTS = { 'shiva-sutras': ['rule', 'iko-yanaci'], anatomy: ['operators', 'run', 'nearest'], anuvritti: ['flow', 'headings', 'assemble'] };
+for (const [label, viewport] of [['desktop', { width: 1280, height: 800 }], ['mobile', { width: 390, height: 800 }]]) {
+	for (const slug of Object.keys(SHOTS)) {
+		await run(`learn-${slug}-${label}`, viewport, async (page) => {
+			await page.goto(`${BASE}/learn/${slug}/`);
+			await page.waitForLoadState('networkidle');
+			await page.waitForTimeout(400);
+			const total = await page.locator('.dots li').count();
+			for (let i = 0; i < total; i++) {
+				const id = (await page.evaluate(() => location.hash.slice(1))) || '';
+				await exercise(page, slug, id);
+				if (label === 'desktop' && SHOTS[slug].includes(id)) await shot(page, `learn-${slug}-${id}`);
+				if (label === 'mobile' && i === 1) await shot(page, `learn-${slug}-mobile`);
+				const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
+				if (overflow > 0) problems.push(`[learn-${slug}-${label}] overflow ${overflow}px on scene ${id}`);
+				if (i < total - 1) {
+					await page.getByRole('button', { name: 'Next →' }).click();
+					await page.waitForTimeout(250);
+				}
+			}
+			const done = await page.locator('.dots button.done').count();
+			results.push(`   ${slug}: ${done}/${total} scenes completed by the walkthrough`);
+		});
+	}
+}
+
+async function exercise(page, slug, id) {
+	const scene = page.locator('.scene');
+	const click = async (loc) => { if (await loc.count()) await loc.first().click(); };
+	if (slug === 'shiva-sutras') {
+		if (id === 'welcome') await click(scene.locator('button.num'));
+		if (id === 'order') await click(scene.getByRole('button', { name: 'Colour by sound type' }));
+		if (id === 'markers') await click(scene.getByRole('button', { name: 'Lift all' }));
+		if (id === 'rule') { await scene.locator('button.slot').nth(0).click(); await scene.getByRole('button', { name: 'marker c' }).click(); await page.waitForTimeout(1800); }
+		if (id === 'play') { for (const nm of ['यण्', 'हल्', 'झल्']) await scene.getByRole('button', { name: nm, exact: true }).click(); }
+		if (id === 'iko-yanaci') { for (let k = 0; k < 4; k++) await scene.locator('button.cell').nth(k).click(); }
+	}
+	if (slug === 'anatomy') {
+		if (id === 'split') await click(scene.locator('button.sutra'));
+		if (id === 'cases') { for (let k = 0; k < 3; k++) await scene.locator('button.w').nth(k).click(); }
+		if (id === 'operators') { for (const [w, sl] of [[0, 0], [1, 1], [2, 2]]) { await scene.locator('button.word').nth(w).click(); await scene.locator('button.slot').nth(sl).click(); } }
+		if (id === 'direction') { await scene.locator('.switch button').nth(1).click(); await scene.locator('.switch button').nth(0).click(); }
+		if (id === 'run') { for (const k of [0, 4]) { await scene.locator('.examples button').nth(k).click(); await scene.getByRole('button', { name: '▶ Run' }).click(); await page.waitForTimeout(5200); } }
+		if (id === 'nearest') { for (const [v, y] of [[0, 1], [0, 3], [0, 2], [0, 0]]) { await scene.locator('.col').nth(0).locator('button:not([disabled])').nth(v).click(); await scene.locator('.col').nth(1).locator('button').nth(y).click(); } }
+	}
+	if (slug === 'anuvritti') {
+		if (id === 'gap') await click(scene.getByRole('button', { name: 'When does this apply?' }));
+		if (id === 'flow') { await scene.getByRole('button', { name: 'Send अचि down' }).click(); await page.waitForTimeout(900); }
+		if (id === 'river') { for (const k of [5, 6, 20]) await scene.locator('.river button').nth(k).click(); }
+		if (id === 'headings') { for (const k of [2, 7]) await scene.locator('button.h').nth(k).click(); await page.waitForTimeout(700); }
+		if (id === 'assemble') { await scene.getByRole('button', { name: /Add/ }).click(); await scene.getByRole('button', { name: /Add/ }).click(); await page.waitForTimeout(600); }
+		if (id === 'code') await scene.getByRole('button', { name: 'As pseudocode' }).click();
+	}
+	if (id === 'quiz') {
+		for (let q = 0; q < 4; q++) {
+			await scene.locator('.opt').first().click();
+			await scene.getByRole('button', { name: /Next question|See result/ }).click();
+		}
+	}
+}
+
+await run('narration', { width: 1280, height: 800 }, async (page) => {
+	await page.goto(`${BASE}/learn/shiva-sutras/`);
+	await page.waitForLoadState('networkidle');
+	await page.waitForTimeout(400);
+	await page.getByRole('button', { name: /Narration/ }).click();
+	await page.waitForTimeout(1500);
+	const talking = await page.locator('svg.guide.talking').count();
+	const lit = await page.locator('.caption span.lit').count();
+	results.push(`   narration: guide talking=${talking > 0}, caption words lit=${lit}`);
+	if (!talking || !lit) problems.push('[narration] audio did not start (no talking guide / lit caption)');
+	await page.getByRole('button', { name: 'Next →' }).click();
+	await page.waitForTimeout(1200);
+	const lit2 = await page.locator('.caption span.lit').count();
+	if (!lit2) problems.push('[narration] did not continue on the next scene');
+	await shot(page, 'narration');
+});
+
+await run('tool-pratyahara', { width: 1280, height: 800 }, async (page) => {
+	await page.goto(`${BASE}/tools/pratyahara/#${encodeURIComponent('यण्')}`);
+	await page.waitForLoadState('networkidle');
+	await page.waitForTimeout(300);
+	const nm = await page.locator('.result .nm').textContent();
+	if (nm?.trim() !== 'यण्') problems.push(`[tool-pratyahara] hash selection gave ${nm}`);
+	await page.locator('.probe button').nth(1).click();
+	await shot(page, 'tool-pratyahara');
+});
+
 await run('dark-sutra', { width: 1280, height: 800 }, async (page) => {
 	await page.goto(`${BASE}/sutra/1.1.1/`);
 	await page.waitForLoadState('networkidle');

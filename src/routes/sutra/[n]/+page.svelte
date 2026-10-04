@@ -7,12 +7,20 @@
 	import TypeBadge from '#lib/components/TypeBadge.svelte';
 	import RuleFormula from '#lib/components/RuleFormula.svelte';
 	import AnuvrittiReading from '#lib/components/AnuvrittiReading.svelte';
+	import { resolve } from '$app/paths';
+	import { EXPLAINERS, CS_LESSONS, TOOLS } from '#lib/catalog.ts';
 	import type { PageProps } from './$types';
 
 	let { data }: PageProps = $props();
 	const s = $derived(data.sutra);
 	const refs = $derived(data.refs);
 	const ref = (id: string | null) => (id ? refs[id] : undefined);
+
+	const lessons = $derived([
+		...EXPLAINERS.map((l) => ({ ...l, href: resolve('/learn') + `/${l.slug}/`, kind: 'Explainer' })),
+		...TOOLS.map((l) => ({ ...l, href: resolve('/tools') + `/${l.slug}/`, kind: 'Tool' })),
+		...CS_LESSONS.map((l) => ({ ...l, href: resolve('/cs') + `/${l.slug}/`, kind: 'Pāṇini & CS' }))
+	].filter((l) => l.status === 'ready' && l.sutras.includes(s.n)));
 
 	type Tab = 'en' | 'kashika' | 'kaumudi' | 'vartika' | 'prayoga';
 	let tab = $state<Tab>('en');
@@ -139,6 +147,14 @@
 		</div>
 
 		<aside class="side" aria-label="Context">
+			{#if lessons.length}
+				<section class="learn">
+					<h3 class="eyebrow">Explained in</h3>
+					{#each lessons as l (l.href)}
+						<a href={l.href}><small>{l.kind}</small>{l.title} →</a>
+					{/each}
+				</section>
+			{/if}
 			{#if s.ad.length}
 				<section>
 					<h3 class="eyebrow">Under the heading</h3>
@@ -490,6 +506,28 @@
 	}
 	.small {
 		font-size: 13.5px;
+	}
+	.learn {
+		display: flex;
+		flex-direction: column;
+		gap: 6px;
+	}
+	.learn a {
+		display: flex;
+		flex-direction: column;
+		padding: 8px 12px;
+		border-radius: 10px;
+		background: var(--saffron-soft);
+		color: var(--saffron-ink);
+		text-decoration: none;
+		font-weight: 600;
+	}
+	.learn small {
+		font-size: 11px;
+		font-weight: 500;
+		text-transform: uppercase;
+		letter-spacing: 0.06em;
+		opacity: 0.8;
 	}
 	.ext {
 		font-size: 13.5px;

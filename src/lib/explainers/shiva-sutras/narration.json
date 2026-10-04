@@ -1,0 +1,9 @@
+{
+	"welcome": "Before the first sūtra, Pāṇini's grammar opens with a list: fourteen short lines of sounds, called the Śiva sūtras. Tradition says they came from the beat of Śiva's drum. Tap any line number to take a closer look.",
+	"order": "The sounds are not in alphabet order. Vowels come first, then semivowels, nasals, voiced stops, voiceless stops, and the hissing sounds. Switch on the colours and look for the groups. Did you notice that ह appears twice?",
+	"markers": "The last consonant of every line is not really part of the list. It is a marker, called an it. Sūtra 1.3.3 makes final consonants markers, and 1.3.9 deletes them after use. Tap the fourteen markers to lift them out.",
+	"rule": "Here is the trick. Sūtra 1.1.71 says a first sound joined to a later marker names every sound from there up to that marker. Let's build अच्. Tap अ, then tap the marker च्.",
+	"play": "Your turn. Pick any starting sound, then any marker after it. I will tell you the name you made, which sounds it holds, and whether Pāṇini actually uses it.",
+	"iko-yanaci": "Now the payoff. Sūtra 6.1.77, इको यणचि, uses three of these names at once: इक्, यण्, and अच्. Tap a vowel of इक् to see which semivowel takes its place.",
+	"quiz": "Let's see what stuck. Four quick questions, then a cheat sheet you can keep."
+}
