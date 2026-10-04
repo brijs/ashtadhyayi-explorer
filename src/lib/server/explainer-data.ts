@@ -1,9 +1,19 @@
 // Per-explainer data, computed at prerender time from the generated corpus.
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
+import { pathToFileURL } from 'node:url';
 import { getCorpus } from './data.ts';
+import { slp1ToDeva } from '#lib/slp1.ts';
 
-type Loader = () => unknown;
+type Loader = () => unknown | Promise<unknown>;
+
+/** vidyut in Node, for derivations shown inside lessons (computed at prerender time). */
+async function vidyutNode() {
+	const dir = join(process.cwd(), 'static', 'wasm');
+	const mod = await import(/* @vite-ignore */ pathToFileURL(join(dir, 'vidyut_prakriya.js')).href);
+	await mod.default({ module_or_path: readFileSync(join(dir, 'vidyut_prakriya_bg.wasm')) });
+	return mod.Vidyut.init();
+}
 
 const readStatic = (f: string) => JSON.parse(readFileSync(join(process.cwd(), 'static', 'data', f), 'utf8'));
 
@@ -14,6 +24,26 @@ const stubN = (n: string) => {
 };
 
 const LOADERS: Record<string, Loader> = {
+	'rewrite-rules': async () => {
+		const { corpus, byApn } = getCorpus();
+		const v = await vidyutNode();
+		const [p] = v.deriveTinantas({
+			dhatu: { aupadeshika: 'BU', gana: 'Bhvadi', antargana: null, sanadi: [], prefixes: [] },
+			lakara: 'Lat', prayoga: 'Kartari', purusha: 'Prathama', vacana: 'Eka', skip_at_agama: false, pada: 'Parasmaipada'
+		});
+		type St = { rule: { source: string; code: string }; result: { text: string; wasChanged: boolean }[] };
+		return {
+			bhavati: (p.history as St[]).map((st) => {
+				const id = byApn.get(st.rule.code);
+				return {
+					code: st.rule.code,
+					s: id ? corpus[id].s : '',
+					en: id ? corpus[id].en : '',
+					terms: st.result.map((t) => ({ t: slp1ToDeva(t.text), ch: t.wasChanged }))
+				};
+			})
+		};
+	},
 	'shiva-sutras': () => {
 		const { corpus } = getCorpus();
 		const list: { name: string; sutras: string[] }[] = readStatic('pratyahara.json');
@@ -53,6 +83,6 @@ const LOADERS: Record<string, Loader> = {
 	}
 };
 
-export function explainerData(slug: string) {
-	return LOADERS[slug]?.() ?? {};
+export async function explainerData(slug: string) {
+	return (await LOADERS[slug]?.()) ?? {};
 }

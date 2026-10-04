@@ -23,7 +23,7 @@ export const EXPLAINERS: Lesson[] = [
 ];
 
 export const CS_LESSONS: Lesson[] = [
-	{ slug: 'rewrite-rules', title: 'Sūtras as rewrite rules', blurb: 'Write A → B / C _ D, run it on real Sanskrit, and watch a rule engine work.', sutras: ['6.1.77', '6.1.87', '6.1.101'], status: 'soon' },
+	{ slug: 'rewrite-rules', title: 'Sūtras as rewrite rules', blurb: 'Write A → B / C _ D, run it on real Sanskrit, and watch a rule engine work.', sutras: ['6.1.77', '6.1.87', '6.1.101'], status: 'ready' },
 	{ slug: 'compression', title: 'Pratyāhāras as compression', blurb: 'Ranges, bitsets and the empty string: how Pāṇini kept the grammar short.', sutras: ['1.1.71', '1.1.60'], status: 'soon' },
 	{ slug: 'metarules', title: 'Metarules & interpreters', blurb: 'Paribhāṣās tell you how to execute the other rules, like an interpreter for a DSL.', sutras: ['1.1.49', '1.1.66', '1.1.67'], status: 'soon' },
 	{ slug: 'grammars', title: 'Grammars, BNF & Pāṇini', blurb: 'Formal grammars, the "Pāṇini–Backus form" proposal, and where the analogy holds or breaks.', sutras: [], status: 'soon' },

@@ -17,6 +17,15 @@
 		"code": "audio/anuvritti/code.95bdd567.mp3",
 		"quiz": "audio/anuvritti/quiz.7343133a.mp3"
 	},
+	"rewrite-rules": {
+		"machine": "audio/rewrite-rules/machine.640598ba.mp3",
+		"notation": "audio/rewrite-rules/notation.3f579dce.mp3",
+		"engine": "audio/rewrite-rules/engine.3e666331.mp3",
+		"tests": "audio/rewrite-rules/tests.9349f66b.mp3",
+		"order": "audio/rewrite-rules/order.ad8fcd94.mp3",
+		"automaton": "audio/rewrite-rules/automaton.a08837a3.mp3",
+		"quiz": "audio/rewrite-rules/quiz.87375286.mp3"
+	},
 	"shiva-sutras": {
 		"welcome": "audio/shiva-sutras/welcome.f22b5f0f.mp3",
 		"order": "audio/shiva-sutras/order.daa49408.mp3",

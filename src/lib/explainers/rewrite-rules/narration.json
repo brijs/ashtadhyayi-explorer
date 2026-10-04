@@ -1,0 +1,9 @@
+{
+	"machine": "Beep. I am Sūtra-bot. I read the Aṣṭādhyāyī the way a computer reads a program. Give it a root and some features, and rules fire one by one until a word comes out. Step through the making of भवति.",
+	"notation": "Linguists today write sound rules as A becomes B, in the environment C blank D. Pāṇini packed the same information into case endings. Tap each card to flip between the sūtra and the modern notation.",
+	"engine": "Here is a tiny rule engine. The five rules are just data: a target, a replacement, a context. Pick two words, or type your own, and run it. I will show you which rule fired.",
+	"tests": "Programmers check code with tests. Here are thirteen textbook examples of vowel sandhi. Switch a rule off and watch which tests fail. Every rule earns its place.",
+	"order": "Now the subtle part. When two rules match, which one wins? Move इको यणचि above अकः सवर्णे दीर्घः and run the tests again. Pāṇini's answer: the exception beats the general rule.",
+	"automaton": "Rules like these can be compiled into a finite-state machine, the same technology inside spell-checkers and keyboards. Feed the machine one sound at a time and watch its state change.",
+	"quiz": "Final check, then a few notes on history, and where the computer analogy breaks."
+}

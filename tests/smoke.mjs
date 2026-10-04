@@ -110,11 +110,12 @@ for (const [label, viewport] of [['desktop', { width: 1280, height: 800 }], ['mo
 }
 
 // Explainers: walk every scene, exercise one interaction, screenshot some.
-const SHOTS = { 'shiva-sutras': ['rule', 'iko-yanaci'], anatomy: ['operators', 'run', 'nearest'], anuvritti: ['flow', 'headings', 'assemble'] };
+const SHOTS = { 'shiva-sutras': ['rule', 'iko-yanaci'], anatomy: ['operators', 'run', 'nearest'], anuvritti: ['flow', 'headings', 'assemble'], 'rewrite-rules': ['machine', 'tests', 'order', 'automaton'] };
+const SECTION = { 'rewrite-rules': 'cs' };
 for (const [label, viewport] of [['desktop', { width: 1280, height: 800 }], ['mobile', { width: 390, height: 800 }]]) {
 	for (const slug of Object.keys(SHOTS)) {
 		await run(`learn-${slug}-${label}`, viewport, async (page) => {
-			await page.goto(`${BASE}/learn/${slug}/`);
+			await page.goto(`${BASE}/${SECTION[slug] ?? 'learn'}/${slug}/`);
 			await page.waitForLoadState('networkidle');
 			await page.waitForTimeout(400);
 			const total = await page.locator('.dots li').count();
@@ -162,6 +163,14 @@ async function exercise(page, slug, id) {
 		if (id === 'headings') { for (const k of [2, 7]) await scene.locator('button.h').nth(k).click(); await page.waitForTimeout(700); }
 		if (id === 'assemble') { await scene.getByRole('button', { name: /Add/ }).click(); await scene.getByRole('button', { name: /Add/ }).click(); await page.waitForTimeout(600); }
 		if (id === 'code') await scene.getByRole('button', { name: 'As pseudocode' }).click();
+	}
+	if (slug === 'rewrite-rules') {
+		if (id === 'machine') { for (let k = 0; k < 12; k++) { const b = scene.getByRole('button', { name: /Fire next rule/ }); if (await b.isDisabled()) break; await b.click(); } }
+		if (id === 'notation') { for (let k = 0; k < 3; k++) await scene.locator('button.flip').nth(k).click(); }
+		if (id === 'engine') { await scene.getByRole('button', { name: 'Run' }).click(); await scene.locator('.ex button').nth(5).click(); }
+		if (id === 'tests') { await scene.locator('.tg input').first().click(); await scene.locator('.tg input').first().click(); await scene.locator('.tg input').first().click(); }
+		if (id === 'order') { await scene.getByRole('button', { name: 'Move 6.1.77 up' }).click(); await scene.getByRole('button', { name: 'Move 6.1.77 up' }).click(); await scene.getByRole('button', { name: 'Move 6.1.77 up' }).click(); }
+		if (id === 'automaton') { for (let k = 0; k < 10; k++) { const b = scene.getByRole('button', { name: /Step/ }); if (await b.isDisabled()) break; await b.click(); } }
 	}
 	if (id === 'quiz') {
 		for (let q = 0; q < 4; q++) {

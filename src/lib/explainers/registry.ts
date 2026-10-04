@@ -4,5 +4,6 @@ import type { ExplainerDef } from '#lib/explainer/types.ts';
 export const EXPLAINER_MODULES: Record<string, () => Promise<{ default: ExplainerDef }>> = {
 	'shiva-sutras': () => import('./shiva-sutras/index.ts'),
 	anatomy: () => import('./anatomy/index.ts'),
-	anuvritti: () => import('./anuvritti/index.ts')
+	anuvritti: () => import('./anuvritti/index.ts'),
+	'rewrite-rules': () => import('./rewrite-rules/index.ts')
 };
