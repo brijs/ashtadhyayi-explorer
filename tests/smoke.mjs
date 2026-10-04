@@ -8,8 +8,9 @@ import { spawn } from 'node:child_process';
 let server = null;
 let BASE = process.argv[2]?.replace(/\/$/, '');
 if (!BASE) {
-	BASE = 'http://localhost:4199';
-	server = spawn('npx', ['vite', 'preview', '--port', '4199', '--strictPort'], { stdio: 'ignore', detached: true });
+	// honours BASE_PATH (e.g. /ashtadhyayi-explorer) so the Pages build can be tested as deployed
+	BASE = 'http://localhost:4199' + (process.env.BASE_PATH ?? '');
+	server = spawn('npx', ['vite', 'preview', '--port', '4199', '--strictPort'], { stdio: 'ignore', detached: true, env: process.env });
 	for (let i = 0; i < 50; i++) {
 		try { if ((await fetch(BASE + '/')).ok) break; } catch {}
 		await new Promise((r) => setTimeout(r, 200));

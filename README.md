@@ -2,7 +2,16 @@
 
 Look up, explore and learn all 3,983 sūtras of Pāṇini's Aṣṭādhyāyī: word-by-word case roles, inherited words (anuvṛtti), headings (adhikāra), commentaries, interactive explainers, and the grammar's connections to computer science.
 
-**Live site:** https://brijs.github.io/ashtadhyayi-explorer/ *(not yet published)*
+[![Deploy](https://github.com/brijs/ashtadhyayi-explorer/actions/workflows/deploy.yml/badge.svg)](https://github.com/brijs/ashtadhyayi-explorer/actions/workflows/deploy.yml)
+
+**Live site: https://brijs.github.io/ashtadhyayi-explorer/**
+
+## What's inside
+
+- **Sūtra Explorer**: all 3,983 sūtras, with word-by-word case roles, technical-term popovers, inherited words (anuvṛtti) and headings (adhikāra), a rewrite-rule sketch, and English, Kāśikā and Siddhānta Kaumudī commentary. Search in Devanagari, IAST, loose romanization, English or by number.
+- **Learn**: 9 interactive explainers (Śiva sūtras, anatomy of a sūtra, anuvṛtti, it-markers, the nearest substitute, kinds of sūtra, rule conflict, the tripādī, building भवति), with optional narration.
+- **Pāṇini & CS**: 6 lessons on rewrite rules, compression, metarules, grammars and BNF, rule ordering, and writing your own sūtra.
+- **Tools**: a pratyāhāra calculator and a derivation debugger that runs [vidyut](https://github.com/ambuda-org/vidyut) in the browser, linking every step to its sūtra.
 
 ## Develop
 
@@ -16,7 +25,7 @@ npm run narration   # re-render changed explainer narration (Kokoro, af_heart; v
 ./scripts/build-wasm.sh  # rebuild vidyut-prakriya WebAssembly (needs rustup + wasm-pack); output is committed
 ```
 
-For a GitHub Pages build, set the base path: `BASE_PATH=/ashtadhyayi-explorer npm run build`.
+For a GitHub Pages build, set the base path: `BASE_PATH=/ashtadhyayi-explorer npm run build`. Pushing to `main` deploys via `.github/workflows/deploy.yml`.
 
 ## Layout
 
