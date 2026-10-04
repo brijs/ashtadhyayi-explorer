@@ -32,3 +32,4 @@ vite.config.ts.timestamp-*
 __pycache__/
 tmp.wav
 /test-results
+/vendor

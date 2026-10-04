@@ -155,6 +155,16 @@
 					{/each}
 				</section>
 			{/if}
+			{#if s.examples?.length}
+				<section class="derivs">
+					<h3 class="eyebrow">See it applied</h3>
+					{#each s.examples as ex (ex.h)}
+						<a href={resolve('/tools/prakriya') + '/#' + ex.h}><span class="deva w">{ex.w}</span><span class="deva d">{ex.d}</span></a>
+					{/each}
+					<span class="muted note">Step-by-step derivations by vidyut</span>
+				</section>
+			{/if}
+
 			{#if s.ad.length}
 				<section>
 					<h3 class="eyebrow">Under the heading</h3>
@@ -506,6 +516,32 @@
 	}
 	.small {
 		font-size: 13.5px;
+	}
+	.derivs {
+		display: flex;
+		flex-direction: column;
+		gap: 4px;
+	}
+	.derivs a {
+		display: flex;
+		align-items: baseline;
+		gap: 8px;
+		text-decoration: none;
+		color: var(--ink);
+	}
+	.derivs a:hover .w {
+		color: var(--indigo);
+	}
+	.derivs .w {
+		font-size: 18px;
+		font-weight: 600;
+	}
+	.derivs .d {
+		font-size: 13px;
+		color: var(--muted);
+	}
+	.derivs .note {
+		font-size: 12px;
 	}
 	.learn {
 		display: flex;

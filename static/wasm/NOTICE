@@ -1,0 +1,3 @@
+vidyut_prakriya.js / vidyut_prakriya_bg.wasm are built from vidyut-prakriya
+(https://github.com/ambuda-org/vidyut), commit in VIDYUT_SHA, by scripts/build-wasm.sh.
+vidyut is released under the MIT License by the Ambuda project and its contributors.

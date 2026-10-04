@@ -8,6 +8,8 @@ import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { devaToIast, asciiDigits } from '../src/lib/translit.ts';
 import { pratyahara, splitPratyaharaName } from '../src/lib/varna.ts';
+import { slp1ToDeva } from '../src/lib/slp1.ts';
+import { LAKARAS, PURUSHAS, VACANAS, VIBHAKTIS } from '../src/lib/vidyut-enums.ts';
 
 const ROOT = join(import.meta.dirname, '..');
 const RAW = join(ROOT, 'data-raw');
@@ -267,6 +269,116 @@ const shiva = shivaRaw.map((x) => ({ id: +x.id, s: x.sutra, iast: devaToIast(x.s
 
 for (const t of terms.values()) (t as any).usedIn = [...(termUsage.get(t.key) ?? [])].sort((a, b) => +a - +b);
 
+// ---------- vidyut: dhātupāṭha + rule texts for derivations ----------
+const tsv = (f: string) =>
+	readFileSync(join(RAW, `vidyut_${f}.tsv`), 'utf8')
+		.split(/\r?\n/)
+		.slice(1)
+		.filter(Boolean)
+		.map((l) => l.split('\t'));
+const GANA: Record<string, string> = {
+	'01': 'Bhvadi', '02': 'Adadi', '03': 'Juhotyadi', '04': 'Divadi', '05': 'Svadi',
+	'06': 'Tudadi', '07': 'Rudhadi', '08': 'Tanadi', '09': 'Kryadi', '10': 'Curadi'
+};
+// antargana ranges as in vidyut's own demo (www/static/vidyut-prakriya-app.js)
+function antargana(gana: string, n: number): string | null {
+	if (gana === '01' && n >= 867 && n <= 932) return 'Ghatadi';
+	if (gana === '10') {
+		if (n >= 279 && n <= 337) return 'Asvadiya';
+		if (n >= 192 && n <= 236) return 'Akusmiya';
+		if (n >= 338 && n <= 388) return 'Adhrshiya';
+	}
+	return null;
+}
+const wasmDir = join(ROOT, 'static', 'wasm');
+const vidyutMod = await import(join(wasmDir, 'vidyut_prakriya.js'));
+await vidyutMod.default({ module_or_path: readFileSync(join(wasmDir, 'vidyut_prakriya_bg.wasm')) });
+const vidyut = vidyutMod.Vidyut.init();
+const dhatus = tsv('dhatupatha')
+	.filter(([code, a]) => GANA[code.slice(0, 2)] && a && a !== '-')
+	.map(([code, a, artha]) => {
+		const g = code.slice(0, 2);
+		const ag = antargana(g, +code.slice(3));
+		let normal = '';
+		try {
+			normal = vidyut.deriveDhatus({ aupadeshika: a, gana: GANA[g], antargana: ag, sanadi: [], prefixes: [] })[0]?.text ?? '';
+		} catch {
+			/* leave blank */
+		}
+		if (!normal) fail(`dhātu ${code} ${a}: no normal form`);
+		return { c: code, a, d: slp1ToDeva(a), n: slp1ToDeva(normal), m: slp1ToDeva(artha ?? ''), g: GANA[g], ag };
+	});
+// Sample derivations → for each sūtra, a few live examples that use it (linked from sūtra pages).
+type Example = { w: string; h: string; d: string; steps: number };
+const examples = new Map<string, Example[]>();
+const record = (ps: { text: string; history: { rule: { source: string; code: string } }[] }[], h: string, d: string) => {
+	const p = ps[0];
+	if (!p) return 0;
+	const ex = { w: slp1ToDeva(p.text), h, d, steps: p.history.length };
+	for (const code of new Set(p.history.filter((st) => st.rule.source === 'ashtadhyayi').map((st) => st.rule.code))) {
+		const id = idFromApn(code);
+		if (!byId.has(id)) continue;
+		const list = examples.get(id) ?? [];
+		if (!list.some((e) => e.w === ex.w)) list.push(ex);
+		examples.set(id, list);
+	}
+	return 1;
+};
+// [dhātupāṭha code, expected 3rd sg. present]. The expected forms double as a correctness check on vidyut.
+const SAMPLE_ROOTS: [string, string][] = [
+	['01.0001', 'भवति'], ['01.1137', 'गच्छति'], ['01.0381', 'पठति'], ['01.1164', 'वदति'], ['08.0010', 'करोति'],
+	['02.0060', 'अस्ति'], ['02.0040', 'एति'], ['03.0010', 'ददाति'], ['04.0001', 'दीव्यति'], ['05.0001', 'सुनोति'],
+	['06.0001', 'तुदति'], ['07.0001', 'रुणद्धि'], ['08.0001', 'तनोति'], ['09.0001', 'क्रीणाति'], ['01.1049', 'नयति'],
+	['01.0642', 'जयति'], ['01.1092', 'शृणोति'], ['01.1143', 'पश्यति'], ['01.1077', 'तिष्ठति'], ['01.1074', 'पिबति'],
+	['01.0051', 'खादति'], ['09.0043', 'जानाति'], ['01.0994', 'बोधति'], ['01.1130', 'लभते'], ['01.0574', 'सेवते'],
+	['01.0862', 'वर्तते'], ['01.0953', 'रमते'], ['01.1157', 'यजति'], ['02.0002', 'हन्ति'], ['02.0058', 'वक्ति'],
+	['06.0092', 'लिखति'], ['01.1151', 'पचति'], ['04.0091', 'नश्यति'], ['01.0919', 'स्मरति'], ['01.1047', 'धरति'],
+	['01.1046', 'हरति'], ['06.0166', 'मुञ्चति'], ['10.0002', 'चिन्तयति'], ['10.0001', 'चोरयति'], ['10.0389', 'कथयति']
+];
+let derived = 0;
+for (const [code, expected] of SAMPLE_ROOTS) {
+	const d = dhatus.find((x) => x.c === code);
+	if (!d) { fail(`sample root ${code} not in dhātupāṭha`); continue; }
+	const dh = { aupadeshika: d.a, gana: d.g, antargana: d.ag, sanadi: [], prefixes: [] };
+	const pada = /ते$/.test(expected) ? 'Atmanepada' : 'Parasmaipada';
+	const derive = (l: string, p: string, pu: string, v: string) =>
+		vidyut.deriveTinantas({ dhatu: dh, lakara: l, prayoga: p, purusha: pu, vacana: v, skip_at_agama: false, pada: p === 'Kartari' ? pada : null });
+	const lat = derive('Lat', 'Kartari', 'Prathama', 'Eka').map((x: { text: string }) => slp1ToDeva(x.text));
+	if (!lat.includes(expected)) fail(`vidyut: ${d.n} (${code}) लट् gave ${lat.join('/') || 'nothing'}, expected ${expected}`);
+	const cells: [string, string, string, string][] = LAKARAS.map((l) => [l.id, 'Kartari', 'Prathama', 'Eka']);
+	if (code === '01.0001') for (const pu of PURUSHAS) for (const v of VACANAS) cells.push(['Lat', 'Kartari', pu.id, v.id]);
+	cells.push(['Lat', 'Karmani', 'Prathama', 'Eka']);
+	for (const [l, p, pu, v] of cells) {
+		const la = LAKARAS.find((x) => x.id === l)!.sa;
+		derived += record(derive(l, p, pu, v), `t=${d.c},${l},${p},${pu},${v}${p === 'Kartari' ? ',' + pada : ''}`, `${d.n} · ${la}${p === 'Karmani' ? ' · कर्मणि' : ''} · ${PURUSHAS.find((x) => x.id === pu)!.sa} ${VACANAS.find((x) => x.id === v)!.sa}`);
+	}
+}
+// [stem (SLP1), gender, expected nom. sg.] — also a correctness check on vidyut
+const SAMPLE_NOUNS: [string, string, string][] = [
+	['rAma', 'Pum', 'रामः'], ['hari', 'Pum', 'हरिः'], ['guru', 'Pum', 'गुरुः'], ['pitf', 'Pum', 'पिता'], ['rAjan', 'Pum', 'राजा'],
+	['sarva', 'Pum', 'सर्वः'], ['nadI', 'Stri', 'नदी'], ['latA', 'Stri', 'लता'], ['mati', 'Stri', 'मतिः'], ['Denu', 'Stri', 'धेनुः'],
+	['mAtf', 'Stri', 'माता'], ['vAri', 'Napumsaka', 'वारि'], ['maDu', 'Napumsaka', 'मधु'], ['jagat', 'Napumsaka', 'जगत्'],
+	['Pala', 'Napumsaka', 'फलम्'], ['manas', 'Napumsaka', 'मनः']
+];
+for (const [stem, g, expected] of SAMPLE_NOUNS) {
+	for (const vi of VIBHAKTIS) for (const v of VACANAS) {
+		// feminine ā/ī stems are derived as ṅyāp-ending (नदी, लता), not as plain stems (cf. लक्ष्मीः)
+		const nyap = g === 'Stri' && /[AI]$/.test(stem);
+		const ps = vidyut.deriveSubantas({ pratipadika: nyap ? { nyap: stem } : { basic: stem }, linga: g, vibhakti: vi.id, vacana: v.id });
+		if (vi.id === 'Prathama' && v.id === 'Eka' && !ps.some((x: { text: string }) => slp1ToDeva(x.text) === expected))
+			fail(`vidyut: ${stem} ${g} nom. sg. gave ${ps.map((x: { text: string }) => slp1ToDeva(x.text)).join('/')}, expected ${expected}`);
+		derived += record(ps, `s=${stem},${g},${vi.id},${v.id}${nyap ? ',nyap' : ''}`, `${slp1ToDeva(stem)} · ${vi.sa} ${v.sa}`);
+	}
+}
+for (const [id, list] of examples) {
+	full[id].examples = list.sort((a, b) => a.steps - b.steps).slice(0, 4).map(({ w, h, d }) => ({ w, h, d }));
+}
+
+const ruleTexts: Record<string, Record<string, string>> = {};
+for (const [src, file] of [['varttika', 'varttikas'], ['kashika', 'kashika'], ['kaumudi', 'kaumudi'], ['linganushasanam', 'linganushasanam'], ['unadi', 'unadipatha'], ['dhatupatha', 'dhatupatha-ganasutras']]) {
+	ruleTexts[src] = Object.fromEntries(tsv(file).map(([c, t]) => [c, slp1ToDeva(t ?? '')]));
+}
+
 // ---------- validation ----------
 const typeCounts: Record<string, number> = {};
 for (const r of raw) {
@@ -299,8 +411,11 @@ w(OUT_STATIC, 'shivasutra.json', shiva);
 w(OUT_STATIC, 'adhikaras.json', adhikaras);
 w(OUT_STATIC, 'meta.json', { sha: readFileSync(join(RAW, '.sha'), 'utf8').trim(), count: raw.length, typeCounts, builtAt: new Date().toISOString().slice(0, 10) });
 w(OUT_GEN, 'sutras.full.json', full);
+w(OUT_STATIC, 'dhatus.json', dhatus);
+w(OUT_STATIC, 'vidyut-rules.json', ruleTexts);
 
 const chips = Object.values(full).flatMap((f: any) => f.pc.flatMap((p: Pada) => p.parts));
 console.log(`✓ ${raw.length} sūtras · ${terms.size} terms · ${adhikaras.length} adhikāra scopes · ${chips.filter((c) => c.term).length}/${chips.length} pada parts linked to terms`);
-console.log(`  types: ${JSON.stringify(typeCounts)}`);
+console.log(`  types: ${JSON.stringify(typeCounts)} · ${dhatus.length} dhātus`);
+console.log(`  ${derived} sample derivations → live examples for ${examples.size} sūtras`);
 if (pratyMismatch.length) console.log(`  note: computed pratyāhāra ≠ listed for: ${pratyMismatch.join(' ')}`);

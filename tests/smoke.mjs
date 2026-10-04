@@ -188,6 +188,47 @@ await run('narration', { width: 1280, height: 800 }, async (page) => {
 	await shot(page, 'narration');
 });
 
+for (const [label, viewport] of [['desktop', { width: 1280, height: 800 }], ['mobile', { width: 390, height: 800 }]]) {
+	await run(`prakriya-${label}`, viewport, async (page) => {
+		await page.goto(`${BASE}/tools/prakriya/`);
+		await page.locator('.title h2').waitFor({ timeout: 15000 });
+		const h = (await page.locator('.title h2').textContent())?.trim();
+		if (h !== 'भवति') problems.push(`[prakriya] default form ${h}, expected भवति`);
+		const cells = (await page.locator('.paradigm .cell').allTextContents()).map((c) => c.trim());
+		results.push(`   भू लट् paradigm: ${cells.join(' ')}`);
+		const want = ['भवति', 'भवतः', 'भवन्ति', 'भवसि', 'भवथः', 'भवथ', 'भवामि', 'भवावः', 'भवामः'];
+		if (cells.join() !== want.join()) problems.push(`[prakriya] paradigm ${cells.join(' ')}`);
+		await page.locator('body').click({ position: { x: 5, y: 300 } });
+		for (let i = 0; i < 5; i++) await page.keyboard.press('ArrowRight');
+		const step = await page.locator('.stepno').textContent();
+		if (!step?.startsWith('Step 6')) problems.push(`[prakriya] arrow keys gave ${step}`);
+		// every Aṣṭādhyāyī step should link to its sūtra page
+		const codes = await page.locator('.steps .c').allTextContents();
+		results.push(`   भवति: ${codes.length} steps: ${codes.join(' ')}`);
+		await shot(page, `prakriya-${label}`);
+		await page.goto(`${BASE}/tools/prakriya/#s=nadI,Stri,Prathama,Eka,nyap`);
+		await page.waitForTimeout(300);
+		await page.reload();
+		await page.locator('.title h2').waitFor({ timeout: 15000 });
+		const n = (await page.locator('.title h2').textContent())?.trim();
+		if (n !== 'नदी') problems.push(`[prakriya] नदी deep link gave ${n}`);
+	});
+}
+
+await run('sutra-to-derivation', { width: 1280, height: 800 }, async (page) => {
+	await page.goto(`${BASE}/sutra/6.1.78/`);
+	await page.waitForLoadState('networkidle');
+	const first = page.locator('.derivs a').first();
+	const w = (await first.locator('.w').textContent())?.trim();
+	await first.click();
+	await page.waitForURL(/tools\/prakriya/);
+	await page.locator('.title h2').waitFor({ timeout: 15000 });
+	const h = (await page.locator('.title h2').textContent())?.trim();
+	const codes = await page.locator('.steps .c').allTextContents();
+	results.push(`   6.1.78 → ${w} → debugger shows ${h}, 6.1.78 among steps: ${codes.includes('6.1.78')}`);
+	if (h !== w || !codes.includes('6.1.78')) problems.push(`[sutra-to-derivation] ${w} → ${h}`);
+});
+
 await run('tool-pratyahara', { width: 1280, height: 800 }, async (page) => {
 	await page.goto(`${BASE}/tools/pratyahara/#${encodeURIComponent('यण्')}`);
 	await page.waitForLoadState('networkidle');

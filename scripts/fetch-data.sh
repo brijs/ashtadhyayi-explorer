@@ -18,3 +18,13 @@ for f in "${FILES[@]}"; do
   echo "fetched $f ($(wc -c <"$out") bytes)"
 done
 echo "$SHA" > "$DIR/.sha"
+
+# vidyut (MIT): dhātupāṭha and the texts of non-Aṣṭādhyāyī rules cited in derivations
+VSHA="$(cat "$(dirname "$0")/../static/wasm/VIDYUT_SHA")"
+for f in dhatupatha varttikas kashika kaumudi linganushasanam unadipatha dhatupatha-ganasutras; do
+  out="$DIR/vidyut_$f.tsv"
+  [ -s "$out" ] && grep -qx "$VSHA" "$DIR/.vsha" 2>/dev/null && continue
+  curl -sfL "https://raw.githubusercontent.com/ambuda-org/vidyut/$VSHA/vidyut-prakriya/data/$f.tsv" -o "$out"
+  echo "fetched vidyut $f.tsv"
+done
+echo "$VSHA" > "$DIR/.vsha"

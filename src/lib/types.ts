@@ -35,6 +35,8 @@ export type FullSutra = {
 	next: string | null;
 	passesTo: string[];
 	scope: { from: string; to: string; count: number } | null;
+	/** live derivations (vidyut) in which this sūtra applies: word, debugger hash, description */
+	examples?: { w: string; h: string; d: string }[];
 };
 
 /** Minimal sūtra info used in lists and links. */
