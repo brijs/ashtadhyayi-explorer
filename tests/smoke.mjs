@@ -154,7 +154,17 @@ async function exercise(page, slug, id) {
 		if (id === 'cases') { for (let k = 0; k < 3; k++) await scene.locator('button.w').nth(k).click(); }
 		if (id === 'operators') { for (const [w, sl] of [[0, 0], [1, 1], [2, 2]]) { await scene.locator('button.word').nth(w).click(); await scene.locator('button.slot').nth(sl).click(); } }
 		if (id === 'direction') { await scene.locator('.switch button').nth(1).click(); await scene.locator('.switch button').nth(0).click(); }
-		if (id === 'run') { for (const k of [0, 4]) { await scene.locator('.examples button').nth(k).click(); await scene.getByRole('button', { name: '▶ Run' }).click(); await page.waitForTimeout(5200); } }
+		if (id === 'run') {
+			// play pauses on the firing step; check the before/after view, then step and jump to the end
+			await scene.getByRole('button', { name: 'Play' }).click();
+			await scene.locator('.change').waitFor({ timeout: 10000 });
+			if ((await scene.locator('.t.was').count()) < 1) problems.push('[anatomy/run] firing step does not mark the changed sound');
+			await scene.getByRole('button', { name: 'Step back' }).click();
+			await scene.getByRole('button', { name: 'Step forward' }).click();
+			await scene.getByRole('button', { name: 'Jump to end' }).click();
+			await scene.locator('.examples button').nth(4).click();
+			await scene.getByRole('button', { name: 'Jump to end' }).click();
+		}
 		if (id === 'nearest') { for (const [v, y] of [[0, 1], [0, 3], [0, 2], [0, 0]]) { await scene.locator('.col').nth(0).locator('button:not([disabled])').nth(v).click(); await scene.locator('.col').nth(1).locator('button').nth(y).click(); } }
 	}
 	if (slug === 'anuvritti') {
