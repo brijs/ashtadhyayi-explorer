@@ -1,0 +1,303 @@
+@import '@fontsource/noto-serif-devanagari/devanagari-400.css';
+@import '@fontsource/noto-serif-devanagari/devanagari-600.css';
+@import '@fontsource/noto-serif-devanagari/devanagari-700.css';
+@import '@fontsource-variable/inter/index.css';
+@import '@fontsource-variable/source-serif-4/index.css';
+
+:root {
+	--font-ui: 'Inter Variable', system-ui, -apple-system, 'Segoe UI', sans-serif;
+	--font-deva: 'Noto Serif Devanagari', 'Kohinoor Devanagari', 'Devanagari Sangam MN', serif;
+	--font-serif: 'Source Serif 4 Variable', Georgia, 'Times New Roman', serif;
+	--font-mono: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+
+	--radius: 10px;
+	--radius-sm: 6px;
+	--shadow: 0 1px 2px rgb(30 20 10 / 0.05), 0 4px 16px rgb(30 20 10 / 0.06);
+	--shadow-lg: 0 8px 40px rgb(30 20 10 / 0.16);
+	--maxw: 1180px;
+
+	/* light */
+	--bg: #fbf9f5;
+	--surface: #ffffff;
+	--surface-2: #f4f0e8;
+	--surface-3: #ebe5da;
+	--ink: #1f1c24;
+	--ink-2: #47434f;
+	--muted: #77717f;
+	--line: #e5ded2;
+	--saffron: #c9670a;
+	--saffron-ink: #9a4c00;
+	--saffron-soft: #fcefe0;
+	--indigo: #3a3f9e;
+	--indigo-soft: #ecedfb;
+	--focus: #3a3f9e;
+
+	/* grammatical roles (vibhakti → function) */
+	--r-target: #c02d48;
+	--r-subject: #0f7f62;
+	--r-left: #2a64c8;
+	--r-right: #8636be;
+	--r-object: #0d7480;
+	--r-instrument: #0d7480;
+	--r-purpose: #0d7480;
+	--r-verb: #9a6200;
+	--r-avyaya: #7b7584;
+	--r-unknown: #7b7584;
+
+	/* neutral case labels share their case's colour */
+	--r-nom: var(--r-subject);
+	--r-gen: var(--r-target);
+	--r-abl: var(--r-left);
+	--r-loc: var(--r-right);
+
+	/* sūtra types */
+	--t-V: #3a3f9e;
+	--t-S: #c9670a;
+	--t-P: #0d7480;
+	--t-AD: #59606d;
+	--t-AT: #8636be;
+
+	color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+	:root:not([data-theme='light']) {
+		--bg: #13121a;
+		--surface: #1b1a23;
+		--surface-2: #23222d;
+		--surface-3: #2d2c39;
+		--ink: #ece9f2;
+		--ink-2: #c6c1d0;
+		--muted: #918b9c;
+		--line: #34323f;
+		--saffron: #f0a24c;
+		--saffron-ink: #f6bb79;
+		--saffron-soft: #3a2a17;
+		--indigo: #a3a8ff;
+		--indigo-soft: #262848;
+		--focus: #a3a8ff;
+		--r-target: #ff7d92;
+		--r-subject: #5ad2aa;
+		--r-left: #82b1ff;
+		--r-right: #cb9cff;
+		--r-object: #5cc6cf;
+		--r-instrument: #5cc6cf;
+		--r-purpose: #5cc6cf;
+		--r-verb: #f0c15e;
+		--r-avyaya: #a29cab;
+		--r-unknown: #a29cab;
+		--t-V: #a3a8ff;
+		--t-S: #f0a24c;
+		--t-P: #5cc6cf;
+		--t-AD: #a7adb9;
+		--t-AT: #cb9cff;
+		--shadow: 0 1px 2px rgb(0 0 0 / 0.3), 0 4px 16px rgb(0 0 0 / 0.25);
+		--shadow-lg: 0 8px 40px rgb(0 0 0 / 0.5);
+		color-scheme: dark;
+	}
+}
+:root[data-theme='dark'] {
+	--bg: #13121a;
+	--surface: #1b1a23;
+	--surface-2: #23222d;
+	--surface-3: #2d2c39;
+	--ink: #ece9f2;
+	--ink-2: #c6c1d0;
+	--muted: #918b9c;
+	--line: #34323f;
+	--saffron: #f0a24c;
+	--saffron-ink: #f6bb79;
+	--saffron-soft: #3a2a17;
+	--indigo: #a3a8ff;
+	--indigo-soft: #262848;
+	--focus: #a3a8ff;
+	--r-target: #ff7d92;
+	--r-subject: #5ad2aa;
+	--r-left: #82b1ff;
+	--r-right: #cb9cff;
+	--r-object: #5cc6cf;
+	--r-instrument: #5cc6cf;
+	--r-purpose: #5cc6cf;
+	--r-verb: #f0c15e;
+	--r-avyaya: #a29cab;
+	--r-unknown: #a29cab;
+	--t-V: #a3a8ff;
+	--t-S: #f0a24c;
+	--t-P: #5cc6cf;
+	--t-AD: #a7adb9;
+	--t-AT: #cb9cff;
+	--shadow: 0 1px 2px rgb(0 0 0 / 0.3), 0 4px 16px rgb(0 0 0 / 0.25);
+	--shadow-lg: 0 8px 40px rgb(0 0 0 / 0.5);
+	color-scheme: dark;
+}
+
+*,
+*::before,
+*::after {
+	box-sizing: border-box;
+}
+
+html {
+	-webkit-text-size-adjust: 100%;
+	scroll-padding-top: 80px;
+}
+
+body {
+	margin: 0;
+	background: var(--bg);
+	color: var(--ink);
+	font-family: var(--font-ui);
+	font-size: 16px;
+	line-height: 1.6;
+	-webkit-font-smoothing: antialiased;
+	overflow-x: hidden;
+}
+
+h1,
+h2,
+h3,
+h4 {
+	font-family: var(--font-serif);
+	line-height: 1.25;
+	font-weight: 600;
+	margin: 0 0 0.5em;
+	letter-spacing: -0.01em;
+}
+
+a {
+	color: var(--indigo);
+	text-decoration-thickness: 1px;
+	text-underline-offset: 2px;
+}
+
+p {
+	margin: 0 0 0.9em;
+}
+
+button {
+	font: inherit;
+	color: inherit;
+}
+
+:focus-visible {
+	outline: 2px solid var(--focus);
+	outline-offset: 2px;
+	border-radius: 4px;
+}
+
+.deva {
+	font-family: var(--font-deva);
+	line-height: 1.7;
+}
+
+.iast {
+	font-family: var(--font-serif);
+	font-style: italic;
+	color: var(--ink-2);
+}
+
+.muted {
+	color: var(--muted);
+}
+
+.wrap {
+	max-width: var(--maxw);
+	margin: 0 auto;
+	padding: 0 20px;
+}
+
+@media (max-width: 600px) {
+	.wrap {
+		padding: 0 16px;
+	}
+}
+
+.card {
+	background: var(--surface);
+	border: 1px solid var(--line);
+	border-radius: var(--radius);
+	box-shadow: var(--shadow);
+}
+
+.btn {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	padding: 7px 14px;
+	border-radius: 999px;
+	border: 1px solid var(--line);
+	background: var(--surface);
+	color: var(--ink);
+	cursor: pointer;
+	font-size: 14px;
+	font-weight: 500;
+	text-decoration: none;
+	transition: background 0.15s, border-color 0.15s;
+}
+.btn:hover {
+	background: var(--surface-2);
+}
+.btn.primary {
+	background: var(--saffron);
+	border-color: var(--saffron);
+	color: #fff;
+}
+.btn.primary:hover {
+	filter: brightness(1.05);
+}
+.btn[aria-pressed='true'] {
+	background: var(--indigo-soft);
+	border-color: var(--indigo);
+	color: var(--indigo);
+}
+
+.eyebrow {
+	font-size: 12px;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+	color: var(--muted);
+	font-weight: 600;
+}
+
+/* Rich commentary text produced by build-data */
+.rich p {
+	margin: 0 0 0.8em;
+}
+.rich .sq {
+	font-family: var(--font-deva);
+	color: var(--saffron-ink);
+}
+.rich a.sref {
+	font-family: var(--font-mono);
+	font-size: 0.85em;
+	padding: 0 4px;
+	border-radius: 4px;
+	background: var(--indigo-soft);
+	text-decoration: none;
+	white-space: nowrap;
+}
+.rich a.sref:hover {
+	text-decoration: underline;
+}
+
+.sr-only {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	padding: 0;
+	margin: -1px;
+	overflow: hidden;
+	clip: rect(0, 0, 0, 0);
+	border: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	*,
+	*::before,
+	*::after {
+		animation-duration: 0.001ms !important;
+		animation-iteration-count: 1 !important;
+		transition-duration: 0.001ms !important;
+		scroll-behavior: auto !important;
+	}
+}
