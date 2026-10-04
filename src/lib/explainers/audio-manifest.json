@@ -24,12 +24,28 @@
 		"passes": "audio/asiddha/passes.db6e13a6.mp3",
 		"quiz": "audio/asiddha/quiz.a57f06f9.mp3"
 	},
+	"compression": {
+		"maxim": "audio/compression/maxim.a2083263.mp3",
+		"ranges": "audio/compression/ranges.f98bf56c.mp3",
+		"bitsets": "audio/compression/bitsets.7296ebf4.mp3",
+		"optimal": "audio/compression/optimal.1af6ffe0.mp3",
+		"zero": "audio/compression/zero.bdf149fa.mp3",
+		"quiz": "audio/compression/quiz.25e06cfc.mp3"
+	},
 	"conflict": {
 		"clash": "audio/conflict/clash.02ac2262.mp3",
 		"later": "audio/conflict/later.e636bcb3.mp3",
 		"apavada": "audio/conflict/apavada.9a7e9114.mp3",
 		"ladder": "audio/conflict/ladder.7342f4cd.mp3",
 		"quiz": "audio/conflict/quiz.34cc5c34.mp3"
+	},
+	"grammars": {
+		"bnf": "audio/grammars/bnf.97a89eef.mp3",
+		"ingerman": "audio/grammars/ingerman.f4734880.mp3",
+		"tree": "audio/grammars/tree.e72d533a.mp3",
+		"karaka": "audio/grammars/karaka.46a9c5a7.mp3",
+		"limits": "audio/grammars/limits.cc2dc599.mp3",
+		"quiz": "audio/grammars/quiz.4acdd343.mp3"
 	},
 	"it-markers": {
 		"tags": "audio/it-markers/tags.50fbcd07.mp3",
@@ -39,6 +55,14 @@
 		"flags": "audio/it-markers/flags.244c03f0.mp3",
 		"quiz": "audio/it-markers/quiz.6b6e5511.mp3"
 	},
+	"metarules": {
+		"parse": "audio/metarules/parse.3e8426ce.mp3",
+		"where": "audio/metarules/where.c187388a.mp3",
+		"inherit": "audio/metarules/inherit.682721a7.mp3",
+		"zip": "audio/metarules/zip.c2ad514a.mp3",
+		"loop": "audio/metarules/loop.204170b5.mp3",
+		"quiz": "audio/metarules/quiz.297c69f6.mp3"
+	},
 	"nearest-substitute": {
 		"choice": "audio/nearest-substitute/choice.5fe5d203.mp3",
 		"map": "audio/nearest-substitute/map.fa9fe518.mp3",
@@ -46,6 +70,13 @@
 		"union": "audio/nearest-substitute/union.146185b3.mp3",
 		"effort": "audio/nearest-substitute/effort.daae70c1.mp3",
 		"quiz": "audio/nearest-substitute/quiz.3d949d10.mp3"
+	},
+	"ordering": {
+		"css": "audio/ordering/css.6db87954.mp3",
+		"elsewhere": "audio/ordering/elsewhere.f7901a00.mp3",
+		"interactions": "audio/ordering/interactions.fa32c8ba.mp3",
+		"counterfeeding": "audio/ordering/counterfeeding.827001b6.mp3",
+		"quiz": "audio/ordering/quiz.6dc73cf5.mp3"
 	},
 	"prakriya": {
 		"root": "audio/prakriya/root.6970e358.mp3",
@@ -80,5 +111,12 @@
 		"counts": "audio/sutra-types/counts.ba49a062.mp3",
 		"niyama": "audio/sutra-types/niyama.6b639692.mp3",
 		"quiz": "audio/sutra-types/quiz.8771b165.mp3"
+	},
+	"write-a-sutra": {
+		"intro": "audio/write-a-sutra/intro.c5b4cdf1.mp3",
+		"yan": "audio/write-a-sutra/yan.eacef12f.mp3",
+		"jas": "audio/write-a-sutra/jas.0622d404.mp3",
+		"sandbox": "audio/write-a-sutra/sandbox.37873f23.mp3",
+		"reflect": "audio/write-a-sutra/reflect.d2f81b73.mp3"
 	}
 }

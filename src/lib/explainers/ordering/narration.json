@@ -1,0 +1,7 @@
+{
+	"css": "Web developers meet Pāṇini's conflict rules every day. In CSS, a more specific selector beats a general one, and between equals, the later rule wins. Toggle the class and swap the order.",
+	"elsewhere": "Linguist Paul Kiparsky named this the Elsewhere Condition: the specific rule applies where it can, and the general rule applies everywhere else. Programmers write it as pattern matching. Try moving the catch-all clause first.",
+	"interactions": "Rules also interact in sequence. One rule can create the input for another, called feeding, or destroy it, called bleeding. Classify these real pairs from the grammar.",
+	"counterfeeding": "And sometimes a rule would feed another but comes too late. That is the tripādī at work: 8.2.7 deletes न्, but 7.1.9 never sees the result. Phonologists call this counterfeeding.",
+	"quiz": "Final check on rule ordering."
+}

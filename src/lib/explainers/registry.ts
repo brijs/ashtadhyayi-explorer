@@ -11,5 +11,10 @@ export const EXPLAINER_MODULES: Record<string, () => Promise<{ default: Explaine
 	'sutra-types': () => import('./sutra-types/index.ts'),
 	conflict: () => import('./conflict/index.ts'),
 	asiddha: () => import('./asiddha/index.ts'),
-	prakriya: () => import('./prakriya/index.ts')
+	prakriya: () => import('./prakriya/index.ts'),
+	compression: () => import('./compression/index.ts'),
+	metarules: () => import('./metarules/index.ts'),
+	grammars: () => import('./grammars/index.ts'),
+	ordering: () => import('./ordering/index.ts'),
+	'write-a-sutra': () => import('./write-a-sutra/index.ts')
 };

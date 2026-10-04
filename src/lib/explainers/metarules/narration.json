@@ -1,0 +1,8 @@
+{
+	"parse": "A sūtra is like source code, and the meta-rules are its parser. Read with 1.1.49, 1.1.66 and 1.1.67, the case endings turn into fields of a rule object. Pick a sūtra and watch it compile.",
+	"where": "A substitute must go somewhere, but where exactly? Two meta-rules decide. A one-letter substitute replaces only the last letter, by 1.1.52. A longer one replaces the whole thing, by 1.1.55. Try both cases.",
+	"inherit": "After अस् is replaced by भू, is भू still a verb root? Sūtra 1.1.56 says a substitute behaves like what it replaced. Programmers call this inheritance. Switch it off and see what breaks.",
+	"zip": "When two lists of equal length are paired, 1.3.10 says: match them in order. Programmers call this zip. Pair the vowels of एच् with their substitutes.",
+	"loop": "Put it together and you get an interpreter loop: find the rules that match, settle any conflict, apply one, and repeat. Step through the loop as it builds भवति.",
+	"quiz": "Last check, and a note on where these meta-rules come from."
+}

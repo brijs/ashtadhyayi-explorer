@@ -1,0 +1,7 @@
+{
+	"intro": "Time to write your own sūtra. You get four slots: what to replace, what to put, and what must come before or after. Choose sound classes, and I will phrase your rule with Pāṇini's case endings.",
+	"yan": "First challenge. Make i, u, ṛ and ḷ turn into y, v, r and l before any vowel. The tests show what your rule does. Make them all pass.",
+	"jas": "Second challenge. At the end of a word, a stop or sibilant becomes a voiced stop of the same place, as in वाक् plus ईशः giving वागीशः. Write the rule.",
+	"sandbox": "Now invent anything you like. Change the slots, type some words, and see what your grammar does to them. Can you break Sanskrit?",
+	"reflect": "Your rules work, but a real grammar needs more: inherited words, conflict resolution, meanings and thousands of interacting rules. That is the Aṣṭādhyāyī."
+}

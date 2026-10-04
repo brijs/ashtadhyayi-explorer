@@ -24,11 +24,11 @@ export const EXPLAINERS: Lesson[] = [
 
 export const CS_LESSONS: Lesson[] = [
 	{ slug: 'rewrite-rules', title: 'Sūtras as rewrite rules', blurb: 'Write A → B / C _ D, run it on real Sanskrit, and watch a rule engine work.', sutras: ['6.1.77', '6.1.87', '6.1.101'], status: 'ready' },
-	{ slug: 'compression', title: 'Pratyāhāras as compression', blurb: 'Ranges, bitsets and the empty string: how Pāṇini kept the grammar short.', sutras: ['1.1.71', '1.1.60'], status: 'soon' },
-	{ slug: 'metarules', title: 'Metarules & interpreters', blurb: 'Paribhāṣās tell you how to execute the other rules, like an interpreter for a DSL.', sutras: ['1.1.49', '1.1.66', '1.1.67'], status: 'soon' },
-	{ slug: 'grammars', title: 'Grammars, BNF & Pāṇini', blurb: 'Formal grammars, the "Pāṇini–Backus form" proposal, and where the analogy holds or breaks.', sutras: [], status: 'soon' },
-	{ slug: 'ordering', title: 'Rule ordering & specificity', blurb: 'Conflict resolution, exceptions, and asiddha as ordered passes.', sutras: ['1.4.2', '8.2.1'], status: 'soon' },
-	{ slug: 'write-a-sutra', title: 'Write your own sūtra', blurb: 'A tiny DSL: compose a sūtra from case-marked words and run it.', sutras: [], status: 'soon' }
+	{ slug: 'compression', title: 'Pratyāhāras as compression', blurb: 'Range encoding, bitsets, a provably optimal ordering, and a zero that remembers.', sutras: ['1.1.71', '1.1.60', '1.1.62', '6.1.68', '8.2.7'], status: 'ready' },
+	{ slug: 'metarules', title: 'Metarules & interpreters', blurb: 'Paribhāṣās tell you how to execute the other rules, like an interpreter for a DSL.', sutras: ['1.1.49', '1.1.66', '1.1.67', '1.1.52', '1.1.55', '1.1.56', '1.3.10', '2.4.52', '7.2.102'], status: 'ready' },
+	{ slug: 'grammars', title: 'Grammars, BNF & Pāṇini', blurb: 'Formal grammars, the "Pāṇini–Backus form" proposal, kāraka roles, and where the analogy holds or breaks.', sutras: ['1.4.23', '1.4.42', '1.4.49', '1.4.54', '2.3.1', '2.3.2', '2.3.18', '3.4.69'], status: 'ready' },
+	{ slug: 'ordering', title: 'Rule ordering & specificity', blurb: 'CSS specificity, the Elsewhere Condition, feeding and bleeding, and asiddha as counterfeeding.', sutras: ['1.4.2', '8.2.1', '8.2.66', '8.3.15', '6.1.101'], status: 'ready' },
+	{ slug: 'write-a-sutra', title: 'Write your own sūtra', blurb: 'A tiny rule language: compose a sūtra from case-marked words, run it, and compare with Pāṇini.', sutras: ['8.2.39'], status: 'ready' }
 ];
 
 export const TOOLS: Lesson[] = [

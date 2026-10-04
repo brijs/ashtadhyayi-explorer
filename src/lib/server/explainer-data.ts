@@ -76,6 +76,34 @@ async function derive(
 }
 
 const LOADERS: Record<string, Loader> = {
+	grammars: async () => ({ bhavati: await derive({ t: ['01.0001', 'BU', 'Parasmaipada'] }) }),
+	metarules: async () => {
+		const { corpus, byApn } = getCorpus();
+		const pick = (n: string) => {
+			const x = corpus[byApn.get(n)!];
+			return { n: x.n, s: x.s, en: x.en, pc: x.pc.map((p) => ({ w: p.w, role: p.role })), an: x.an.map((a) => a.w) };
+		};
+		return {
+			sutras: ['6.1.77', '8.2.39', '7.1.9', '6.1.78', '2.4.52', '7.2.102'].map(pick),
+			bhavishyati: await derive({ t: ['02.0060', 'asa~'] }, { lakara: 'Lrt' }),
+			tau: await derive({ s: ['tad', 'Pum', 'Prathama', 'Dvi'] }),
+			bhavati: await derive({ t: ['01.0001', 'BU', 'Parasmaipada'] })
+		};
+	},
+	compression: async () => {
+		const { corpus, order } = getCorpus();
+		const { toVarnas, isVowel } = await import('#lib/varna.ts');
+		const syl = (t: string) => toVarnas(t).filter(isVowel).length;
+		const total = order.reduce((n, id) => n + syl(corpus[id].s), 0);
+		const list: { name: string; computedMatches: boolean }[] = readStatic('pratyahara.json');
+		return {
+			syllables: total,
+			perSutra: total / order.length,
+			count: order.length,
+			names: [...new Set(list.filter((p) => p.computedMatches || p.name === 'अण्' || p.name === 'इण्').map((p) => p.name))],
+			raja: await derive({ s: ['rAjan', 'Pum', 'Prathama', 'Eka'] })
+		};
+	},
 	prakriya: async () => ({ bhavati: await derive({ t: ['01.0001', 'BU', 'Parasmaipada'] }) }),
 	asiddha: async () => {
 		const { corpus, order, byApn } = getCorpus();

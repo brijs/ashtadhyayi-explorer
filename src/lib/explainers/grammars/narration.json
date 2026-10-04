@@ -1,0 +1,8 @@
+{
+	"bnf": "Programming languages are defined with grammars written in Backus-Naur Form: a symbol on the left, the things it can become on the right. Here is a toy grammar for a Sanskrit verb. Expand the symbols until only sounds remain.",
+	"ingerman": "In 1967, Peter Ingerman wrote to the Communications of the ACM, suggesting the name Pāṇini-Backus Form. He argued that Pāṇini's notation was comparable in power to Backus's. Flip the cards to compare the toolkits.",
+	"tree": "But notice: our toy grammar produced भू अ ति, not भवति. A grammar of this kind glues pieces together. Pāṇini's rules then rewrite the string in context. Compare the two pictures.",
+	"karaka": "Pāṇini also starts from meaning. Who acts, what is acted on, what is the tool? These roles, called kārakas, decide the case endings. Assign the roles, then switch between active and passive.",
+	"limits": "So is the Aṣṭādhyāyī a formal grammar? Partly. It is precise and generative, but it also relies on meaning, on conventions, and on a tradition of interpretation. Sort the claims into fair and unfair.",
+	"quiz": "Last check, then the references."
+}

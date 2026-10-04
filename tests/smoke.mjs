@@ -110,8 +110,8 @@ for (const [label, viewport] of [['desktop', { width: 1280, height: 800 }], ['mo
 }
 
 // Explainers: walk every scene, exercise one interaction, screenshot some.
-const SHOTS = { 'shiva-sutras': ['rule', 'iko-yanaci'], anatomy: ['operators', 'run', 'nearest'], anuvritti: ['flow', 'headings', 'assemble'], 'rewrite-rules': ['machine', 'tests', 'order', 'automaton'], 'it-markers': ['detect', 'effects', 'flags'], 'nearest-substitute': ['map', 'union', 'effort'], 'sutra-types': ['verse', 'sort', 'counts', 'niyama'], conflict: ['clash', 'apavada', 'ladder'], asiddha: ['split', 'rajabhih', 'passes'], prakriya: ['ending', 'sandhi', 'review'] };
-const SECTION = { 'rewrite-rules': 'cs' };
+const SHOTS = { 'shiva-sutras': ['rule', 'iko-yanaci'], anatomy: ['operators', 'run', 'nearest'], anuvritti: ['flow', 'headings', 'assemble'], 'rewrite-rules': ['machine', 'tests', 'order', 'automaton'], 'it-markers': ['detect', 'effects', 'flags'], 'nearest-substitute': ['map', 'union', 'effort'], 'sutra-types': ['verse', 'sort', 'counts', 'niyama'], conflict: ['clash', 'apavada', 'ladder'], asiddha: ['split', 'rajabhih', 'passes'], prakriya: ['ending', 'sandhi', 'review'], compression: ['ranges', 'bitsets', 'optimal', 'zero'], metarules: ['parse', 'where', 'loop'], grammars: ['bnf', 'karaka', 'limits'], ordering: ['css', 'elsewhere', 'counterfeeding'], 'write-a-sutra': ['yan', 'jas', 'sandbox'] };
+const SECTION = { 'rewrite-rules': 'cs', compression: 'cs', metarules: 'cs', grammars: 'cs', ordering: 'cs', 'write-a-sutra': 'cs' };
 for (const [label, viewport] of [['desktop', { width: 1280, height: 800 }], ['mobile', { width: 390, height: 800 }]]) {
 	for (const slug of Object.keys(SHOTS)) {
 		await run(`learn-${slug}-${label}`, viewport, async (page) => {
@@ -210,10 +210,48 @@ async function exercise(page, slug, id) {
 		if (id === 'ending') await scene.locator('td button').first().click();
 		if (id === 'vikarana') { await scene.locator('.btn').click(); await scene.locator('.btn').click(); }
 	}
-	if (id === 'quiz' || (slug === 'prakriya' && id === 'review')) {
-		for (let q = 0; q < 4; q++) {
+	if (slug === 'compression') {
+		if (id === 'maxim') await scene.locator('.cmp').click();
+		if (id === 'ranges') { await scene.locator('.ctl .deva').nth(0).click(); await scene.locator('.ctl .deva').nth(2).click(); }
+		if (id === 'bitsets') { await scene.locator('.bits th button').nth(1).click(); await scene.locator('.bits th button').nth(12).click(); }
+		if (id === 'optimal') { await scene.getByRole('button', { name: 'ha', exact: true }).nth(0).click(); await scene.getByRole('button', { name: 'ha', exact: true }).nth(1).click(); }
+		if (id === 'zero') { await scene.locator('.sw .btn').click(); await scene.locator('.sw .btn').click(); }
+	}
+	if (slug === 'metarules') {
+		if (id === 'parse') { await scene.locator('.picks button').nth(1).click(); await scene.locator('.picks button').nth(2).click(); }
+		if (id === 'where') { await scene.getByRole('button', { name: 'only the last letter' }).click(); await scene.getByRole('button', { name: 'the whole thing' }).click(); }
+		if (id === 'inherit') { await scene.locator('.out .btn').click(); await scene.locator('.out .btn').click(); }
+		if (id === 'zip') { const SH = [2, 0, 3, 1]; for (let i = 0; i < 4; i++) { await scene.locator('.col').nth(0).locator('.t').nth(i).click(); await scene.locator('.col').nth(1).locator('.t').nth(SH.indexOf(i)).click(); } }
+		if (id === 'loop') { for (let k = 0; k < 40; k++) { const b = scene.getByRole('button', { name: /Step/ }); if (await b.isDisabled()) break; await b.click(); } }
+	}
+	if (slug === 'grammars') {
+		if (id === 'bnf') { for (let k = 0; k < 6; k++) { const b = scene.locator('.alts .btn').first(); if (!(await b.count())) break; await b.click(); } }
+		if (id === 'ingerman') { for (let k = 0; k < 3; k++) await scene.locator('button.c').nth(k).click(); }
+		if (id === 'tree') await scene.locator('.tabs button').nth(1).click();
+		if (id === 'karaka') { for (let k = 0; k < 3; k++) { await scene.locator('.p').nth(k).click(); await scene.locator('.r').nth(k).click(); } await scene.locator('.sent .btn').click(); await scene.locator('.sent .btn').click(); }
+		if (id === 'limits') { const F = [true, false, true, false, true, false]; for (let k = 0; k < F.length; k++) await scene.locator('.claims li').nth(k).getByRole('button', { name: F[k] ? 'fair' : 'unfair', exact: true }).click(); }
+	}
+	if (slug === 'ordering') {
+		if (id === 'css') { await scene.locator('.btns .btn').nth(0).click(); await scene.locator('.btns .btn').nth(1).click(); }
+		if (id === 'elsewhere') { await scene.locator('.res .btn').click(); await scene.locator('.res .btn').click(); }
+		if (id === 'interactions') { const K = ['feeding', 'feeding', 'bleeding']; for (let k = 0; k < 3; k++) await scene.locator('.pairs li').nth(k).getByRole('button', { name: K[k], exact: true }).click(); }
+		if (id === 'counterfeeding') { await scene.locator('.btn').last().click(); await scene.locator('.btn').last().click(); }
+	}
+	if (slug === 'write-a-sutra') {
+		const sel = (i) => scene.locator('.slots select').nth(i);
+		if (id === 'intro') { await sel(0).selectOption('इक्'); await sel(1).selectOption('यण्'); await sel(3).selectOption('अच्'); }
+		if (id === 'yan') { await sel(0).selectOption('इक्'); await sel(1).selectOption('यण्'); await sel(3).selectOption('अच्'); }
+		if (id === 'jas') { await sel(0).selectOption('झल्'); await sel(1).selectOption('जश्'); await sel(3).selectOption('END'); }
+		if (id === 'sandbox') { await sel(0).selectOption('इक्'); await sel(1).selectOption('अक्'); await sel(3).selectOption('अच्'); }
+	}
+	if (id === 'quiz' || id === 'reflect' || (slug === 'prakriya' && id === 'review')) {
+		for (let q = 0; q < 6; q++) {
+			if (!(await scene.locator('.opt').count())) break;
 			await scene.locator('.opt').first().click();
-			await scene.getByRole('button', { name: /Next question|See result/ }).click();
+			const nb = scene.getByRole('button', { name: /Next question|See result/ });
+			const last = /See result/.test((await nb.textContent()) ?? '');
+			await nb.click();
+			if (last) break;
 		}
 	}
 }

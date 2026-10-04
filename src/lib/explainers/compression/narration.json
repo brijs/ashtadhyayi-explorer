@@ -1,0 +1,8 @@
+{
+	"maxim": "Beep. Grammarians have a saying: saving half a syllable is as joyful as the birth of a son. Pāṇini's whole grammar averages under eight syllables a sūtra. Expand इको यणचि and count what the short form saves.",
+	"ranges": "A pratyāhāra is a range: start here, stop at that marker. Any run of sounds that ends at a marker costs just two letters. Select some sounds and I will tell you if they can be named.",
+	"bitsets": "Inside a computer, a sound class is a row of bits, one per sound. Checking membership is a single operation. Pick a sound and see which classes switch on.",
+	"optimal": "Could the fourteen lines be arranged better? Wiebke Petersen proved in 2004 that some sound must appear twice, and that repeating ह, as Pāṇini did, is an optimal choice. Tap each copy of ह to see which classes need it.",
+	"zero": "Pāṇini also has a zero. Lopa means a sound is deleted. But by 1.1.62, a deleted affix can still have effects, like a ghost. Watch राजन् lose its ending and still behave like a full word.",
+	"quiz": "Final check. Then a summary of the compression tricks."
+}
