@@ -5,5 +5,11 @@ export const EXPLAINER_MODULES: Record<string, () => Promise<{ default: Explaine
 	'shiva-sutras': () => import('./shiva-sutras/index.ts'),
 	anatomy: () => import('./anatomy/index.ts'),
 	anuvritti: () => import('./anuvritti/index.ts'),
-	'rewrite-rules': () => import('./rewrite-rules/index.ts')
+	'rewrite-rules': () => import('./rewrite-rules/index.ts'),
+	'it-markers': () => import('./it-markers/index.ts'),
+	'nearest-substitute': () => import('./nearest-substitute/index.ts'),
+	'sutra-types': () => import('./sutra-types/index.ts'),
+	conflict: () => import('./conflict/index.ts'),
+	asiddha: () => import('./asiddha/index.ts'),
+	prakriya: () => import('./prakriya/index.ts')
 };

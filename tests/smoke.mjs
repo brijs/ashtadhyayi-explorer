@@ -110,7 +110,7 @@ for (const [label, viewport] of [['desktop', { width: 1280, height: 800 }], ['mo
 }
 
 // Explainers: walk every scene, exercise one interaction, screenshot some.
-const SHOTS = { 'shiva-sutras': ['rule', 'iko-yanaci'], anatomy: ['operators', 'run', 'nearest'], anuvritti: ['flow', 'headings', 'assemble'], 'rewrite-rules': ['machine', 'tests', 'order', 'automaton'] };
+const SHOTS = { 'shiva-sutras': ['rule', 'iko-yanaci'], anatomy: ['operators', 'run', 'nearest'], anuvritti: ['flow', 'headings', 'assemble'], 'rewrite-rules': ['machine', 'tests', 'order', 'automaton'], 'it-markers': ['detect', 'effects', 'flags'], 'nearest-substitute': ['map', 'union', 'effort'], 'sutra-types': ['verse', 'sort', 'counts', 'niyama'], conflict: ['clash', 'apavada', 'ladder'], asiddha: ['split', 'rajabhih', 'passes'], prakriya: ['ending', 'sandhi', 'review'] };
 const SECTION = { 'rewrite-rules': 'cs' };
 for (const [label, viewport] of [['desktop', { width: 1280, height: 800 }], ['mobile', { width: 390, height: 800 }]]) {
 	for (const slug of Object.keys(SHOTS)) {
@@ -172,7 +172,45 @@ async function exercise(page, slug, id) {
 		if (id === 'order') { await scene.getByRole('button', { name: 'Move 6.1.77 up' }).click(); await scene.getByRole('button', { name: 'Move 6.1.77 up' }).click(); await scene.getByRole('button', { name: 'Move 6.1.77 up' }).click(); }
 		if (id === 'automaton') { for (let k = 0; k < 10; k++) { const b = scene.getByRole('button', { name: /Step/ }); if (await b.isDisabled()) break; await b.click(); } }
 	}
-	if (id === 'quiz') {
+	if (slug === 'it-markers') {
+		if (id === 'tags') { for (let k = 0; k < 3; k++) await scene.locator('.piece').nth(k).click(); }
+		if (id === 'detect') { for (const k of [1, 4, 6, 7]) await scene.locator('.list button').nth(k).click(); }
+		if (id === 'strip') await scene.locator('.btn').first().click();
+		if (id === 'effects') { for (let k = 0; k < 3; k++) await scene.locator('.aff').nth(k).click(); }
+		if (id === 'flags') { for (let k = 0; k < 3; k++) await scene.locator('.b').nth(k).click(); }
+	}
+	if (slug === 'nearest-substitute') {
+		if (id === 'choice') await scene.locator('.opt').nth(1).click();
+		if (id === 'map') { for (let k = 0; k < 3; k++) await scene.locator('.pl').nth(k).click(); }
+		if (id === 'guna') { for (const [v, g] of [[0, 1], [1, 2], [2, 0]]) { await scene.locator('.vw').nth(v).click(); await scene.locator('.g').nth(g).click(); } }
+		if (id === 'union') { for (let k = 0; k < 3; k++) await scene.locator('.pairs button').nth(k).click(); }
+		if (id === 'effort') { await scene.getByRole('button', { name: 'Apply' }).click(); await scene.locator('.cand').nth(3).click(); }
+	}
+	if (slug === 'sutra-types') {
+		if (id === 'verse') { for (let k = 0; k < 4; k++) await scene.locator('.verse button').nth(k).click(); }
+		if (id === 'sort') { for (let k = 0; k < 6; k++) { await scene.locator('.c').first().click(); await scene.locator('.bin').nth(k).click(); } }
+		if (id === 'counts') { for (let k = 0; k < 2; k++) await scene.locator('.row').nth(k).click(); }
+		if (id === 'niyama') await scene.locator('.tabs button').nth(1).click();
+	}
+	if (slug === 'conflict') {
+		if (id === 'clash') { for (let k = 0; k < 2; k++) await scene.locator('.rule .btn').nth(k).click(); }
+		if (id === 'later') await scene.locator('.tabs button').nth(1).click();
+		if (id === 'apavada') { await scene.locator('.dot').nth(2).click(); await scene.locator('.dot').nth(0).click(); }
+		if (id === 'ladder') { for (const t of ['later', 'always-applicable', 'inner', 'exception']) await scene.locator('.chip', { hasText: t }).click(); }
+	}
+	if (slug === 'asiddha') {
+		if (id === 'split') await scene.locator('.bar').click();
+		if (id === 'rajabhih') { await scene.getByRole('button', { name: 'Pretend it can' }).click(); await scene.getByRole('button', { name: /Apply 8.2.1/ }).click(); }
+		if (id === 'order') { await scene.getByRole('button', { name: 'Run reversed' }).click(); await scene.getByRole('button', { name: 'Run in this order' }).click(); }
+		if (id === 'passes') { for (let k = 0; k < 4; k++) await scene.getByRole('button', { name: /Run next pass/ }).click(); }
+	}
+	if (slug === 'prakriya') {
+		if (id === 'root') await scene.locator('.entry').click();
+		if (id === 'tense' || id === 'guna' || id === 'sandhi') await scene.locator('.o').nth(1).click();
+		if (id === 'ending') await scene.locator('td button').first().click();
+		if (id === 'vikarana') { await scene.locator('.btn').click(); await scene.locator('.btn').click(); }
+	}
+	if (id === 'quiz' || (slug === 'prakriya' && id === 'review')) {
 		for (let q = 0; q < 4; q++) {
 			await scene.locator('.opt').first().click();
 			await scene.getByRole('button', { name: /Next question|See result/ }).click();

@@ -1,0 +1,9 @@
+{
+	"root": "Let's build a verb from scratch. Every verb starts as a root from the list of roots, the Dhātupāṭha. Our root is भू, to be. Tap it to see its entry.",
+	"tense": "First, tense. We want the present: is, right now. Pāṇini marks tense with abstract placeholders called lakāras. Pick the right one.",
+	"ending": "The ल् is only a placeholder. It must be replaced by a real personal ending. We want third person singular: he or she is. Pick the ending from the table.",
+	"vikarana": "Verbs of the first class need a connector between root and ending. Sūtra 3.1.68 brings in शप्, which, once its tags fall away, is just अ.",
+	"guna": "Before an affix like this अ, the root vowel strengthens to its guṇa, by sūtra 7.3.84. ऊ is a lip vowel. Which guṇa is nearest?",
+	"sandhi": "Last step. ओ now meets अ. By sūtra 6.1.78, ओ becomes अव् before a vowel. What is the finished word?",
+	"review": "Here is the whole derivation as vidyut computes it, all twenty steps, with the big moves highlighted. Then a short quiz."
+}

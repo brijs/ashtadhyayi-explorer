@@ -17,6 +17,45 @@
 		"code": "audio/anuvritti/code.95bdd567.mp3",
 		"quiz": "audio/anuvritti/quiz.7343133a.mp3"
 	},
+	"asiddha": {
+		"split": "audio/asiddha/split.5a03f5f9.mp3",
+		"rajabhih": "audio/asiddha/rajabhih.0d60051d.mp3",
+		"order": "audio/asiddha/order.a2a7ebe9.mp3",
+		"passes": "audio/asiddha/passes.db6e13a6.mp3",
+		"quiz": "audio/asiddha/quiz.a57f06f9.mp3"
+	},
+	"conflict": {
+		"clash": "audio/conflict/clash.02ac2262.mp3",
+		"later": "audio/conflict/later.e636bcb3.mp3",
+		"apavada": "audio/conflict/apavada.9a7e9114.mp3",
+		"ladder": "audio/conflict/ladder.7342f4cd.mp3",
+		"quiz": "audio/conflict/quiz.34cc5c34.mp3"
+	},
+	"it-markers": {
+		"tags": "audio/it-markers/tags.50fbcd07.mp3",
+		"detect": "audio/it-markers/detect.7754b0a8.mp3",
+		"strip": "audio/it-markers/strip.051e4ddb.mp3",
+		"effects": "audio/it-markers/effects.c17edb37.mp3",
+		"flags": "audio/it-markers/flags.244c03f0.mp3",
+		"quiz": "audio/it-markers/quiz.6b6e5511.mp3"
+	},
+	"nearest-substitute": {
+		"choice": "audio/nearest-substitute/choice.5fe5d203.mp3",
+		"map": "audio/nearest-substitute/map.fa9fe518.mp3",
+		"guna": "audio/nearest-substitute/guna.3a89a83f.mp3",
+		"union": "audio/nearest-substitute/union.146185b3.mp3",
+		"effort": "audio/nearest-substitute/effort.daae70c1.mp3",
+		"quiz": "audio/nearest-substitute/quiz.3d949d10.mp3"
+	},
+	"prakriya": {
+		"root": "audio/prakriya/root.6970e358.mp3",
+		"tense": "audio/prakriya/tense.1c601aa7.mp3",
+		"ending": "audio/prakriya/ending.370391fa.mp3",
+		"vikarana": "audio/prakriya/vikarana.e2f6f60a.mp3",
+		"guna": "audio/prakriya/guna.5d2e6ca3.mp3",
+		"sandhi": "audio/prakriya/sandhi.7f57b4f6.mp3",
+		"review": "audio/prakriya/review.9c3668fd.mp3"
+	},
 	"rewrite-rules": {
 		"machine": "audio/rewrite-rules/machine.640598ba.mp3",
 		"notation": "audio/rewrite-rules/notation.3f579dce.mp3",
@@ -34,5 +73,12 @@
 		"play": "audio/shiva-sutras/play.7e1d1d9a.mp3",
 		"iko-yanaci": "audio/shiva-sutras/iko-yanaci.f5942b40.mp3",
 		"quiz": "audio/shiva-sutras/quiz.df51736b.mp3"
+	},
+	"sutra-types": {
+		"verse": "audio/sutra-types/verse.07594533.mp3",
+		"sort": "audio/sutra-types/sort.e5e42280.mp3",
+		"counts": "audio/sutra-types/counts.ba49a062.mp3",
+		"niyama": "audio/sutra-types/niyama.6b639692.mp3",
+		"quiz": "audio/sutra-types/quiz.8771b165.mp3"
 	}
 }

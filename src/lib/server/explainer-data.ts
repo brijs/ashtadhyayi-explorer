@@ -23,27 +23,105 @@ const stubN = (n: string) => {
 	return { n: s.n, s: s.s, iast: s.iast, en: s.en };
 };
 
+export type DStep = { code: string; source: string; s: string; en: string; terms: { t: string; ch: boolean }[] };
+export type Derivation = { word: string; hash: string; steps: DStep[] };
+
+let vidyutP: Promise<any> | null = null;
+const vidyut = () => (vidyutP ??= vidyutNode());
+
+/** Run one vidyut derivation at prerender time and return it with sūtra texts attached. */
+async function derive(
+	spec: { t: [string, string, string?] } | { s: [string, string, string, string, boolean?] } | { k: [string, string] },
+	extra: Partial<{ lakara: string; purusha: string; vacana: string }> = {}
+): Promise<Derivation> {
+	const v = await vidyut();
+	const { corpus, byApn } = getCorpus();
+	const dhatus: { c: string; a: string; g: string; ag: string | null }[] = JSON.parse(readFileSync(join(process.cwd(), 'static', 'data', 'dhatus.json'), 'utf8'));
+	const dh = (code: string) => {
+		const d = dhatus.find((x) => x.c === code)!;
+		return { aupadeshika: d.a, gana: d.g, antargana: d.ag, sanadi: [], prefixes: [] };
+	};
+	let ps: any[];
+	let hash: string;
+	if ('t' in spec) {
+		const [code, , pada] = spec.t;
+		const lakara = extra.lakara ?? 'Lat', purusha = extra.purusha ?? 'Prathama', vacana = extra.vacana ?? 'Eka';
+		ps = v.deriveTinantas({ dhatu: dh(code), lakara, prayoga: 'Kartari', purusha, vacana, skip_at_agama: false, pada: pada ?? null });
+		hash = `t=${code},${lakara},Kartari,${purusha},${vacana}${pada ? ',' + pada : ''}`;
+	} else if ('s' in spec) {
+		const [stem, linga, vibhakti, vacana, nyap] = spec.s;
+		ps = v.deriveSubantas({ pratipadika: nyap ? { nyap: stem } : { basic: stem }, linga, vibhakti, vacana });
+		hash = `s=${stem},${linga},${vibhakti},${vacana}${nyap ? ',nyap' : ''}`;
+	} else {
+		const [code, krt] = spec.k;
+		ps = v.deriveKrdantas({ dhatu: dh(code), krt, unadi: null, lakara: null, prayoga: null, upapada: null });
+		hash = '';
+	}
+	const p = ps[0];
+	if (!p) throw new Error(`no derivation for ${JSON.stringify(spec)}`);
+	return {
+		word: slp1ToDeva(p.text),
+		hash,
+		steps: p.history.map((st: { rule: { source: string; code: string }; result: { text: string; wasChanged: boolean }[] }) => {
+			const id = st.rule.source === 'ashtadhyayi' ? byApn.get(st.rule.code) : undefined;
+			return {
+				code: st.rule.code,
+				source: st.rule.source,
+				s: id ? corpus[id].s : '',
+				en: id ? corpus[id].en : '',
+				terms: st.result.map((t) => ({ t: slp1ToDeva(t.text), ch: t.wasChanged }))
+			};
+		})
+	};
+}
+
 const LOADERS: Record<string, Loader> = {
-	'rewrite-rules': async () => {
-		const { corpus, byApn } = getCorpus();
-		const v = await vidyutNode();
-		const [p] = v.deriveTinantas({
-			dhatu: { aupadeshika: 'BU', gana: 'Bhvadi', antargana: null, sanadi: [], prefixes: [] },
-			lakara: 'Lat', prayoga: 'Kartari', purusha: 'Prathama', vacana: 'Eka', skip_at_agama: false, pada: 'Parasmaipada'
-		});
-		type St = { rule: { source: string; code: string }; result: { text: string; wasChanged: boolean }[] };
+	prakriya: async () => ({ bhavati: await derive({ t: ['01.0001', 'BU', 'Parasmaipada'] }) }),
+	asiddha: async () => {
+		const { corpus, order, byApn } = getCorpus();
+		const tri = corpus[byApn.get('8.2.1')!].scope!;
+		const start = order.indexOf(tri.from);
 		return {
-			bhavati: (p.history as St[]).map((st) => {
-				const id = byApn.get(st.rule.code);
-				return {
-					code: st.rule.code,
-					s: id ? corpus[id].s : '',
-					en: id ? corpus[id].en : '',
-					terms: st.result.map((t) => ({ t: slp1ToDeva(t.text), ch: t.wasChanged }))
-				};
-			})
+			tripadi: { count: tri.count, startFrac: start / order.length, total: order.length },
+			rajabhih: await derive({ s: ['rAjan', 'Pum', 'Trtiya', 'Bahu'] }),
+			ramaih: await derive({ s: ['rAma', 'Pum', 'Trtiya', 'Bahu'] }),
+			ramah: await derive({ s: ['rAma', 'Pum', 'Prathama', 'Eka'] })
 		};
 	},
+	conflict: async () => ({
+		pl: await derive({ s: ['vfkza', 'Pum', 'Caturthi', 'Bahu'] }),
+		du: await derive({ s: ['vfkza', 'Pum', 'Caturthi', 'Dvi'] })
+	}),
+	'sutra-types': async () => {
+		const { corpus, order } = getCorpus();
+		const counts: Record<string, number> = {};
+		const examples: Record<string, { n: string; s: string; en: string }[]> = {};
+		for (const id of order) {
+			const s = corpus[id];
+			const c = s.types[0]?.code ?? 'V';
+			counts[c] = (counts[c] ?? 0) + 1;
+			const list = (examples[c] ??= []);
+			// spread examples across the text: take every k-th
+			list.push({ n: s.n, s: s.s, en: s.en });
+		}
+		for (const c of Object.keys(examples)) {
+			const l = examples[c];
+			const step = Math.max(1, Math.floor(l.length / 8));
+			examples[c] = l.filter((_, i) => i % step === 0).slice(0, 8);
+		}
+		return {
+			counts,
+			examples,
+			patya: await derive({ s: ['pati', 'Pum', 'Trtiya', 'Eka'] }),
+			harina: await derive({ s: ['hari', 'Pum', 'Trtiya', 'Eka'] })
+		};
+	},
+	'it-markers': async () => ({
+		ktva: await derive({ k: ['08.0010', 'ktvA'] }),
+		trc: await derive({ k: ['08.0010', 'tfc'] }),
+		nvul: await derive({ k: ['08.0010', 'Rvul'] })
+	}),
+	'rewrite-rules': async () => ({ bhavati: (await derive({ t: ['01.0001', 'BU', 'Parasmaipada'] })).steps }),
 	'shiva-sutras': () => {
 		const { corpus } = getCorpus();
 		const list: { name: string; sutras: string[] }[] = readStatic('pratyahara.json');

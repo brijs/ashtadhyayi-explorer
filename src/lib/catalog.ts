@@ -14,12 +14,12 @@ export const EXPLAINERS: Lesson[] = [
 	{ slug: 'shiva-sutras', title: 'Śiva sūtras & pratyāhāras', sa: 'माहेश्वरसूत्राणि', blurb: '14 lines of sounds and a trick that turns any stretch of them into a two-letter name.', sutras: ['1.3.3', '1.3.9', '1.1.71', '1.1.69'], status: 'ready', minutes: 8 },
 	{ slug: 'anatomy', title: 'Anatomy of a sūtra', sa: 'सूत्रस्य अङ्गानि', blurb: 'Case endings as operators: how इको यणचि packs a whole rewrite rule into three words.', sutras: ['6.1.77', '1.1.49', '1.1.66', '1.1.67'], status: 'ready', minutes: 8 },
 	{ slug: 'anuvritti', title: 'Anuvṛtti & adhikāra', sa: 'अनुवृत्तिः अधिकारश्च', blurb: 'Words that flow down into later rules, and headings that scope whole chapters.', sutras: ['1.3.11', '3.1.1', '3.1.2', '6.1.72'], status: 'ready', minutes: 8 },
-	{ slug: 'it-markers', title: 'It-markers', sa: 'इत्संज्ञा', blurb: 'Tags attached to affixes and roots that switch rules on, then vanish.', sutras: ['1.3.2', '1.3.3', '1.3.9'], status: 'soon' },
-	{ slug: 'nearest-substitute', title: 'The nearest substitute', sa: 'स्थानेऽन्तरतमः', blurb: 'Which y, v, r or l replaces which vowel? Nearest match on a map of the mouth.', sutras: ['1.1.50'], status: 'soon' },
-	{ slug: 'sutra-types', title: 'Six kinds of sūtra', sa: 'सूत्रप्रकाराः', blurb: 'Definitions, meta-rules, operations, restrictions, extensions and headings.', sutras: ['1.1.1', '1.1.49', '6.1.77'], status: 'soon' },
-	{ slug: 'conflict', title: 'When rules collide', sa: 'विप्रतिषेधः', blurb: 'Later beats earlier, the specific beats the general, and other tie-breakers.', sutras: ['1.4.2'], status: 'soon' },
-	{ slug: 'asiddha', title: 'The invisible last three pādas', sa: 'पूर्वत्रासिद्धम्', blurb: 'Why the final 3 pādas behave like a later compiler pass.', sutras: ['8.2.1', '6.1.86', '6.4.22'], status: 'soon' },
-	{ slug: 'prakriya', title: 'Building a word: भू → भवति', sa: 'प्रक्रिया', blurb: 'Watch a root, a tense and a person become a finished verb, rule by rule.', sutras: ['1.3.1', '3.2.123', '3.4.78', '3.1.68', '7.3.84', '6.1.78'], status: 'soon' }
+	{ slug: 'it-markers', title: 'It-markers', sa: 'इत्संज्ञा', blurb: 'Tags attached to affixes and roots that switch rules on, then vanish.', sutras: ['1.3.2', '1.3.3', '1.3.4', '1.3.5', '1.3.7', '1.3.8', '1.3.9', '1.1.5', '7.2.115'], status: 'ready' },
+	{ slug: 'nearest-substitute', title: 'The nearest substitute', sa: 'स्थानेऽन्तरतमः', blurb: 'Which y, v, r or l replaces which vowel? Nearest match on a map of the mouth.', sutras: ['1.1.50', '1.1.51', '1.1.2', '6.1.87', '8.4.62'], status: 'ready' },
+	{ slug: 'sutra-types', title: 'Six kinds of sūtra', sa: 'सूत्रप्रकाराः', blurb: 'Definitions, meta-rules, operations, restrictions, extensions and headings.', sutras: ['1.4.8', '1.4.7', '1.1.56', '1.2.4', '7.3.120'], status: 'ready' },
+	{ slug: 'conflict', title: 'When rules collide', sa: 'विप्रतिषेधः', blurb: 'Later beats earlier, the specific beats the general, and other tie-breakers.', sutras: ['1.4.2', '7.3.102', '7.3.103', '6.1.101'], status: 'ready' },
+	{ slug: 'asiddha', title: 'The invisible last three pādas', sa: 'पूर्वत्रासिद्धम्', blurb: 'Why the final 3 pādas behave like a later compiler pass.', sutras: ['8.2.1', '8.2.7', '7.1.9', '8.2.66', '8.3.15', '6.4.22', '6.1.86'], status: 'ready' },
+	{ slug: 'prakriya', title: 'Building a word: भू → भवति', sa: 'प्रक्रिया', blurb: 'Watch a root, a tense and a person become a finished verb, rule by rule.', sutras: ['1.3.1', '3.2.123', '3.4.78', '3.4.77', '1.3.78', '3.1.68', '7.3.84', '6.1.78'], status: 'ready' }
 ];
 
 export const CS_LESSONS: Lesson[] = [

@@ -1,0 +1,8 @@
+{
+	"choice": "Many rules simply say: replace this with guṇa. But guṇa is three vowels, अ, ए and ओ. Which one? Pāṇini answers with a single meta-rule, 1.1.50: use the nearest one. Try guessing the guṇa of इ.",
+	"map": "Nearest in what sense? Above all, in where the mouth makes the sound. The tradition sorts every sound by its place of articulation. Tap a place to light up its sounds.",
+	"guna": "Now apply it. इ is made at the palate, so its guṇa is ए, which also uses the palate. उ is made at the lips, so its guṇa is ओ. Match each vowel to its guṇa.",
+	"union": "Sometimes two sounds are replaced by one, as in देव plus इन्द्र. अ comes from the throat and इ from the palate. Which single vowel covers both places? Combine the pairs and see.",
+	"effort": "Place is not the only measure. In वाक् plus हरिः, the ह can be replaced by a sound like the ग before it. Of the ग family, घ wins, because like ह it is voiced and breathy.",
+	"quiz": "Four questions to finish, then a map of the places to keep."
+}

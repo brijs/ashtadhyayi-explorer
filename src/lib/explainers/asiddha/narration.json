@@ -1,0 +1,7 @@
+{
+	"split": "The last three pādas of the Aṣṭādhyāyī, from 8.2.1 onward, are special. Sūtra 8.2.1 says: from here on, each rule counts as not having happened, as far as the earlier rules are concerned. Tap to see the split.",
+	"rajabhih": "Here is why that matters. Take राजन् plus भिस्, by kings. A late rule, 8.2.7, deletes the न्, leaving राज, which ends in अ. Should the earlier rules for अ stems now apply? Try it both ways.",
+	"order": "Inside the last three pādas, rules also run strictly in order, each blind to the ones after it. Watch रामस् become रामः. First स् becomes रु, then the final र becomes visarga. Try the opposite order.",
+	"passes": "Programmers will recognize this. It is like a compiler with passes: the main grammar runs first, then the last three pādas run one after another. An earlier pass never sees what a later pass did.",
+	"quiz": "Four questions, then a summary."
+}

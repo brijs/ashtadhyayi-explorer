@@ -1,0 +1,7 @@
+{
+	"clash": "Sometimes two rules both match the same form. Take वृक्ष plus भ्यस्, for the trees. One rule wants to lengthen the अ, another wants to turn it into ए. Try each and see what comes out.",
+	"later": "Pāṇini settles this with sūtra 1.4.2: when two rules conflict, the later one wins. 7.3.103 comes after 7.3.102, so we get वृक्षेभ्यः. Compare it with the dual, where only one rule matches.",
+	"apavada": "Some rules exist only as exceptions. If the general rule always won, the exception would never apply. So the specific rule wins. Tap the examples to see which rule claims each one.",
+	"ladder": "The tradition ranks these tie-breakers in a well-known meta-rule. Later beats earlier, an always-applicable rule beats a later one, an inner rule beats that, and an exception beats them all. Arrange the ladder.",
+	"quiz": "Four questions to finish, and the ladder to keep."
+}

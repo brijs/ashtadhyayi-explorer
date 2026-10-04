@@ -21,7 +21,7 @@
 		{ href: resolve('/cs') + '/', label: 'Pāṇini & CS', match: ['/cs'] },
 		{ href: resolve('/about') + '/', label: 'About', match: ['/about'] }
 	];
-	const isActive = (match: string[]) => match.some((m) => page.url.pathname.includes(m));
+	const isActive = (match: string[]) => match.some((m) => page.url.pathname.includes(m + '/'));
 
 	function onKey(e: KeyboardEvent) {
 		const target = e.target as HTMLElement;

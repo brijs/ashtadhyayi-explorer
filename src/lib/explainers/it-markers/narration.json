@@ -1,0 +1,8 @@
+{
+	"tags": "Pāṇini's affixes come with extra letters attached, like tags on a parcel. The affix शप् is pronounced just अ, yet it carries श् and प्. Tap each piece to find out whether it is a real sound or a tag.",
+	"detect": "Which letters are tags? A handful of sūtras, 1.3.2 to 1.3.8, decide. Pick an item and I will show which rule marks each tag. Watch जस् closely: its final स् escapes.",
+	"strip": "A tag has done its job once the item is named. Then sūtra 1.3.9 deletes it. Strip the tags from every item and see what is actually pronounced.",
+	"effects": "So why carry tags at all? They switch rules on and off. The same root कृ gives कृत्वा, कर्तृ and कारक, depending on the tags of the affix. Compare the three.",
+	"flags": "In programming terms, tags are feature flags stored inside the name. Toggle the flags on an affix and watch what would happen to the root.",
+	"quiz": "Four questions, then a cheat sheet of the most useful tags."
+}

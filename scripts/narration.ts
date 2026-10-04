@@ -15,7 +15,7 @@ const RESPELL: Record<string, string> = {
 	'sūtra': 'sootra', 'sūtras': 'sootras', 'pāṇini': 'Paanini', "pāṇini's": "Paanini's", 'śiva': 'Shiva', "śiva's": "Shiva's",
 	'pratyāhāra': 'prut-yaa-haara', 'pratyāhāras': 'prut-yaa-haaras', 'anuvṛtti': 'unoo-vritti', 'adhikāra': 'udhi-kaara',
 	'adhikāras': 'udhi-kaaras', 'kāśikā': 'Kaashikaa', 'apavāda': 'upa-vaada', 'saṃhitā': 'sum-hitaa', 'śap': 'shup',
-	'it': 'it', 'aṣṭādhyāyī': 'ush-taadh-yaa-yee', 'paribhāṣā': 'pari-bhaa-shaa', 'vidhi': 'vidhi'
+	'it': 'it', 'guṇa': 'goona', 'vṛddhi': 'vriddhi', 'saṃjñā': 'sungyaa', 'ghi': 'ghee', 'tripādī': 'tri-paadee', 'lakāras': 'la-kaaras', 'dhātupāṭha': 'dhaatu-paatha', 'sārvadhātuka': 'saarva-dhaatuka', 'aṣṭādhyāyī': 'ush-taadh-yaa-yee', 'paribhāṣā': 'pari-bhaa-shaa', 'vidhi': 'vidhi'
 };
 
 // A lone vowel letter is said as its sound ("इ" → "ee", not the pronoun "I").
