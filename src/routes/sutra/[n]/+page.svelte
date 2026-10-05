@@ -7,6 +7,7 @@
 	import TypeBadge from '#lib/components/TypeBadge.svelte';
 	import RuleFormula from '#lib/components/RuleFormula.svelte';
 	import AnuvrittiReading from '#lib/components/AnuvrittiReading.svelte';
+	import ImpliedTable from '#lib/components/ImpliedTable.svelte';
 	import { resolve } from '$app/paths';
 	import { EXPLAINERS, CS_LESSONS, TOOLS } from '#lib/catalog.ts';
 	import type { PageProps } from './$types';
@@ -25,11 +26,15 @@
 	type Tab = 'en' | 'kashika' | 'kaumudi' | 'vartika' | 'prayoga';
 	let tab = $state<Tab>('en');
 	let showAllPasses = $state(false);
+	// a list that is really a table (src/lib/tables.ts) is shown as one by default
+	let asTable = $state(true);
 	$effect(() => {
 		s.id;
 		tab = 'en';
 		showAllPasses = false;
+		asTable = true;
 	});
+	const hasPratyahara = $derived(Object.values(data.terms).some((t) => t.kind === 'pratyahara'));
 
 	const tabs = $derived(
 		[
@@ -98,15 +103,34 @@
 					{/each}
 				</ul>
 				{#if Object.keys(data.terms).length}
-					<p class="muted tip">Dotted words are technical terms. Tap one to see its definition.</p>
+					<p class="muted tip">
+						Dotted words are technical terms{#if hasPratyahara}, <span class="pr-key">dashed</span> ones pratyāhāras (names for classes of sounds or affixes){/if}. Hover or tap one to see its card.
+					</p>
+				{/if}
+				{#if data.table}
+					<div class="view" role="group" aria-label="How to show the list">
+						<button class="btn" aria-pressed={!asTable} onclick={() => (asTable = false)}>As written</button>
+						<button class="btn" aria-pressed={asTable} onclick={() => (asTable = true)}>As a table</button>
+					</div>
+					{#if asTable}<ImpliedTable table={data.table} {refs} />{/if}
+				{/if}
+				{#if data.tableLinks.length}
+					<p class="table-links">
+						{#each data.tableLinks as t (t.id)}
+							<a href={sutraHref(ref(t.id)?.n ?? '')}>
+								{s.types.some((x) => x.code === 'P') ? 'A table read this way' : 'See the table this defines'}: <span class="n">{ref(t.id)?.n}</span>
+								<span class="deva">{t.title.sa}</span> {t.title.en} →
+							</a>
+						{/each}
+					</p>
 				{/if}
 			</section>
 
 			<section class="block">
-				<AnuvrittiReading pc={s.pc} an={s.an} ad={s.ad} ss={s.ss} ssIast={s.ssIast} {refs} />
+				<AnuvrittiReading pc={s.pc} an={s.an} ad={s.ad} ss={s.ss} ssIast={s.ssIast} {refs} terms={data.terms} />
 			</section>
 
-			<RuleFormula pc={s.pc} />
+			<RuleFormula pc={s.pc} terms={data.terms} {refs} />
 
 			<section class="block commentary" aria-labelledby="com-h">
 				<h2 id="com-h" class="eyebrow">Commentary</h2>
@@ -354,6 +378,27 @@
 	.tip {
 		font-size: 13px;
 		margin: 8px 0 0;
+	}
+	.pr-key {
+		border-bottom: 2px dashed var(--saffron);
+	}
+	.view {
+		display: flex;
+		gap: 6px;
+		margin-top: 16px;
+	}
+	.table-links {
+		display: flex;
+		flex-direction: column;
+		gap: 4px;
+		margin: 12px 0 0;
+		font-size: 14px;
+	}
+	.table-links a {
+		text-decoration: none;
+	}
+	.table-links a:hover {
+		text-decoration: underline;
 	}
 	.tabs {
 		display: flex;
