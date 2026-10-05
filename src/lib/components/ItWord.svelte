@@ -14,7 +14,10 @@
 		const out: { vs: string[]; it: string | null; kept?: string; start: number }[] = [];
 		units.forEach((u, i) => {
 			const prev = out.at(-1);
-			if (prev && !u.it && !prev.it && !u.kept && !prev.kept) prev.vs.push(u.v);
+			const plain = !u.it && !prev?.it && !u.kept && !prev?.kept;
+			// a two-sound tag marked as a unit (1.3.5 ञि टु डु, the vārttika's इर्) stays one button
+			const pairTag = !!u.it && prev?.it === u.it && (u.it === '1.3.5' || u.it === '1.3.3.1');
+			if (prev && (plain || pairTag)) prev.vs.push(u.v);
 			else out.push({ vs: [u.v], it: u.it, kept: u.kept, start: i });
 		});
 		// A consonant and the vowel after it are one akṣara, so a group boundary between them is drawn inside the akṣara:
