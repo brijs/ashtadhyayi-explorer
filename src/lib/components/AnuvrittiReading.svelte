@@ -30,14 +30,14 @@
 			</span>
 		{/each}
 		{#if expanded}
-			{#each an as x, i (x.id + x.w)}
+			{#each an as x, i (i)}
 				<a class="w inherited" href={sutraHref(refs[x.id]?.n ?? '')} in:fly={{ y: -18, duration: 380, delay: 70 * i }} title="Carried down (anuvṛtti) from {refs[x.id]?.n}: {refs[x.id]?.s}">
 					<span class="deva">{x.w}</span>
 					{#if settings.iast}<i>{x.iast}</i>{/if}
 					<span class="src">↓ {refs[x.id]?.n}</span>
 				</a>
 			{/each}
-			{#each headings as x, i (x.id + x.w)}
+			{#each headings as x, i (i)}
 				<a class="w heading" href={sutraHref(refs[x.id]?.n ?? '')} in:fly={{ y: -18, duration: 380, delay: 70 * (an.length + i) }} title="Heading (adhikāra) from {refs[x.id]?.n}: {refs[x.id]?.s}">
 					<span class="deva">{x.w}</span>
 					{#if settings.iast}<i>{x.iast}</i>{/if}

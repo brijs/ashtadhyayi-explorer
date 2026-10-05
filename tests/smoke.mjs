@@ -92,6 +92,19 @@ for (const [label, viewport] of [['desktop', { width: 1280, height: 800 }], ['mo
 		await page.waitForTimeout(700);
 		await page.locator('.anuvritti').scrollIntoViewIfNeeded();
 		await shot(page, `anuvritti-${label}`);
+		// 1.4.103 used to crash here: the upstream data repeats an inherited word (duplicate each-key)
+		await page.goto(`${BASE}/sutra/1.4.103/`);
+		await page.waitForLoadState('networkidle');
+		await page.waitForTimeout(400);
+		await page.getByRole('button', { name: /Fill in inherited words/ }).click();
+		await page.locator('.w.inherited').first().waitFor();
+		// term popover opens on hover too
+		await page.goto(`${BASE}/sutra/6.1.77/`);
+		await page.waitForLoadState('networkidle');
+		await page.waitForTimeout(400);
+		await page.locator('.chip .trigger').first().hover();
+		await page.locator('.pop').waitFor();
+		await page.mouse.move(0, 0);
 		// commentary tabs + a commentary cross-link (client-side navigation)
 		await page.goto(`${BASE}/sutra/6.1.77/`);
 		await page.waitForLoadState('networkidle');

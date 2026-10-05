@@ -159,8 +159,9 @@ function parsePc(id: string, pc: string, operational: boolean): Pada[] {
 }
 
 // ---------- word@sūtra references (anuvṛtti, adhikāra) ----------
+// The upstream data repeats some word@source pairs (e.g. त्रीणि@1.4.101 in 1.4.103); keep the first.
 const parseAn = (id: string, s: string) =>
-	s.split('##').filter(Boolean).map((x) => {
+	[...new Set(s.split('##').filter(Boolean))].map((x) => {
 		const [w, src] = x.split('$');
 		if (!byId.has(src)) fail(`${apnOf(id)}: anuvṛtti source ${src} not found`);
 		return { w, iast: devaToIast(w), id: src };
