@@ -4,6 +4,7 @@
 	import { sutraHref, adhyayaHref, withBase } from '#lib/links.ts';
 	import { ROLE_INFO, type Role } from '#lib/types.ts';
 	import PadaChip from '#lib/components/PadaChip.svelte';
+	import { detectIts } from '#lib/it.ts';
 	import TypeBadge from '#lib/components/TypeBadge.svelte';
 	import RuleFormula from '#lib/components/RuleFormula.svelte';
 	import AnuvrittiReading from '#lib/components/AnuvrittiReading.svelte';
@@ -45,6 +46,7 @@
 	const inherits = $derived(
 		Object.entries(Object.groupBy(s.an, (x) => x.id)).map(([id, xs]) => ({ id, words: xs!.map((x) => x.w) }))
 	);
+	const hasIts = $derived(s.pc.some((p) => p.parts.some((x) => x.it && detectIts(x.u ?? x.w, x.it).some((u) => u.it))));
 	const rolesUsed = $derived([...new Set(s.pc.map((p) => p.role))] as Role[]);
 
 	function onKey(e: KeyboardEvent) {
@@ -99,6 +101,12 @@
 				</ul>
 				{#if Object.keys(data.terms).length}
 					<p class="muted tip">Dotted words are technical terms. Tap one to see its definition.</p>
+				{/if}
+				{#if hasIts}
+					<p class="muted tip it-tip">
+						<span class="it-swatch deva" aria-hidden="true">ल्</span> Pink letters are it-markers (anubandhas), tags dropped by 1.3.9. Hover or tap one for the rule that marks it, or try the
+						<a href={resolve('/tools') + '/anubandha/'}>it-letter finder</a>.
+					</p>
 				{/if}
 			</section>
 
@@ -354,6 +362,14 @@
 	.tip {
 		font-size: 13px;
 		margin: 8px 0 0;
+	}
+	.it-swatch {
+		color: var(--it);
+		background: var(--it-soft);
+		border-radius: 4px;
+		padding: 0 3px;
+		margin-right: 2px;
+		font-size: 15px;
 	}
 	.tabs {
 		display: flex;

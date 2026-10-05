@@ -16,7 +16,7 @@ export const load: PageServerLoad = ({ params }) => {
 
 	const termMap = getTerms();
 	const terms: Record<string, Term> = {};
-	for (const p of s.pc) for (const part of p.parts) if (part.term && termMap.has(part.term)) terms[part.term] = termMap.get(part.term)!;
+	for (const p of s.pc) for (const part of p.parts) if (part.term && !part.it && termMap.has(part.term)) terms[part.term] = termMap.get(part.term)!;
 	// stubs for every sūtra a term or link points to
 	const refIds = new Set<string>([
 		...s.an.map((x) => x.id),

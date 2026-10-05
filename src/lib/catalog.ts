@@ -14,7 +14,7 @@ export const EXPLAINERS: Lesson[] = [
 	{ slug: 'shiva-sutras', title: 'Śiva sūtras & pratyāhāras', sa: 'माहेश्वरसूत्राणि', blurb: '14 lines of sounds and a trick that turns any stretch of them into a two-letter name.', sutras: ['1.3.3', '1.3.9', '1.1.71', '1.1.69'], status: 'ready', minutes: 8 },
 	{ slug: 'anatomy', title: 'Anatomy of a sūtra', sa: 'सूत्रस्य अङ्गानि', blurb: 'Case endings as operators: how इको यणचि packs a whole rewrite rule into three words.', sutras: ['6.1.77', '1.1.49', '1.1.66', '1.1.67'], status: 'ready', minutes: 8 },
 	{ slug: 'anuvritti', title: 'Anuvṛtti & adhikāra', sa: 'अनुवृत्तिः अधिकारश्च', blurb: 'Words that flow down into later rules, and headings that scope whole chapters.', sutras: ['1.3.11', '3.1.1', '3.1.2', '6.1.72'], status: 'ready', minutes: 8 },
-	{ slug: 'it-markers', title: 'It-markers', sa: 'इत्संज्ञा', blurb: 'Tags attached to affixes and roots that switch rules on, then vanish.', sutras: ['1.3.2', '1.3.3', '1.3.4', '1.3.5', '1.3.7', '1.3.8', '1.3.9', '1.1.5', '7.2.115'], status: 'ready' },
+	{ slug: 'it-markers', title: 'It-markers', sa: 'इत्संज्ञा', blurb: 'Tags attached to affixes and roots that switch rules on, then vanish.', sutras: ['1.3.2', '1.3.3', '1.3.4', '1.3.5', '1.3.6', '1.3.7', '1.3.8', '1.3.9', '1.1.5', '7.2.115', '4.1.41'], status: 'ready' },
 	{ slug: 'nearest-substitute', title: 'The nearest substitute', sa: 'स्थानेऽन्तरतमः', blurb: 'Which y, v, r or l replaces which vowel? Nearest match on a map of the mouth.', sutras: ['1.1.50', '1.1.51', '1.1.2', '6.1.87', '8.4.62'], status: 'ready' },
 	{ slug: 'sutra-types', title: 'Six kinds of sūtra', sa: 'सूत्रप्रकाराः', blurb: 'Definitions, meta-rules, operations, restrictions, extensions and headings.', sutras: ['1.4.8', '1.4.7', '1.1.56', '1.2.4', '7.3.120'], status: 'ready' },
 	{ slug: 'conflict', title: 'When rules collide', sa: 'विप्रतिषेधः', blurb: 'Later beats earlier, the specific beats the general, and other tie-breakers.', sutras: ['1.4.2', '7.3.102', '7.3.103', '6.1.101'], status: 'ready' },
@@ -33,6 +33,7 @@ export const CS_LESSONS: Lesson[] = [
 
 export const TOOLS: Lesson[] = [
 	{ slug: 'pratyahara', title: 'Pratyāhāra calculator', sa: 'प्रत्याहारः', blurb: 'Pick a start sound and a marker; see the class light up on the Śiva sūtras.', sutras: ['1.1.71'], status: 'ready' },
+	{ slug: 'anubandha', title: 'It-letter finder', sa: 'अनुबन्धः', blurb: 'Which letters of an affix or root are tags? Rule-by-rule through 1.3.2–1.3.9, with what each tag does.', sutras: ['1.3.2', '1.3.3', '1.3.4', '1.3.5', '1.3.6', '1.3.7', '1.3.8', '1.3.9', '1.1.5', '7.2.115', '7.2.116', '3.4.113', '7.1.1', '7.1.2', '7.1.3', '7.3.50', '3.4.77'], status: 'ready' },
 	{ slug: 'prakriya', title: 'Derivation debugger', sa: 'प्रक्रिया', blurb: 'Step through real word derivations; every step links to the sūtra that fired.', sutras: [], status: 'ready' },
 	{ slug: 'sandhi', title: 'Sandhi playground', sa: 'सन्धिः', blurb: 'Join two words and see which sūtras apply.', sutras: ['6.1.77', '6.1.87', '6.1.101'], status: 'soon' }
 ];

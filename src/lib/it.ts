@@ -14,8 +14,9 @@ export const CONTEXTS: { id: ItContext; label: string; hint: string }[] = [
 	{ id: 'other', label: 'Other', hint: 'only 1.3.2 and 1.3.3 apply' }
 ];
 
-/** One sound of the upadeśa. `it` is the sūtra that makes it an it; `kept` the one that prevents it. */
-export type ItUnit = { v: string; it: string | null; kept?: string };
+/** One sound of the upadeśa. `it` is the sūtra that makes it an it; `kept` the one that prevents it;
+ * `as` the sound it really stands for when the spelling shows a sandhi form (ष्ट्रन् = ष् + त्रन्). */
+export type ItUnit = { v: string; it: string | null; kept?: string; as?: string };
 
 /** The sūtras (and one vārttika) that decide it-hood, in the order they appear. */
 export const IT_RULES: Record<string, { s: string; en: string }> = {
@@ -30,13 +31,28 @@ export const IT_RULES: Record<string, { s: string; en: string }> = {
 	'1.3.9': { s: 'तस्य लोपः', en: 'An it is deleted.' }
 };
 
+/** Rules that stop a sound from being an it (or explain its spelling). Texts are checked against the corpus. */
+export const KEPT_RULES: Record<string, { s: string; en: string; why: string }> = {
+	'1.3.4': { s: 'न विभक्तौ तुस्माः', en: 'In a case or verb ending, a final t-row consonant, स् or म् is not an it.', why: 'a final t-row sound, स् or म् of a vibhakti' },
+	'7.1.3': { s: 'झोऽन्तः', en: 'The झ् of an affix is replaced by अन्त्.', why: 'झ् is replaced later (by अन्त्), so it cannot be dropped now' },
+	'7.1.2': { s: 'आयनेयीनीयियः फढखच्छघां प्रत्ययादीनाम्', en: 'Affix-initial फ्, ढ्, ख्, छ्, घ् are replaced by आयन्, एय्, ईन्, ईय्, इय्.', why: 'this initial is replaced later, so it cannot be dropped now' },
+	'7.3.50': { s: 'ठस्येकः', en: 'The ठ् of an affix is replaced by इक.', why: 'ठ् is replaced later (by इक), so it cannot be dropped now' },
+	'7.1.1': { s: 'युवोरनाकौ', en: 'The affix parts यु and वु are replaced by अन and अक.', why: 'the nasal उँ of यु/वु stays so that 7.1.1 can replace them' },
+	'3.4.77': { s: 'लस्य', en: 'Heading: (the following replace) ल्, i.e. the lakāras.', why: 'the ल् of a lakāra must survive, or 3.4.77 would have nothing to work on' },
+	'8.4.41': { s: 'ष्टुना ष्टुः', en: 'A dental next to ष् or a ṭ-row sound becomes retroflex.', why: 'written ट only because of the preceding ष्; once ष् is gone it is त्' }
+};
+
 const NASAL = 'ँ';
 const TU = new Set(['त्', 'थ्', 'द्', 'ध्', 'न्']);
 const CU = new Set(['च्', 'छ्', 'ज्', 'झ्', 'ञ्']);
 const TTU = new Set(['ट्', 'ठ्', 'ड्', 'ढ्', 'ण्']);
 const KU = new Set(['क्', 'ख्', 'ग्', 'घ्', 'ङ्']);
-// Initial sounds of taddhitas that are replaced rather than dropped (7.1.2 आयनेयीनीयियः फढखछघां प्रत्ययादीनाम्, 7.3.50 ठस्येकः).
+// Initial sounds of taddhitas that are replaced rather than dropped (7.1.2 आयनेयीनीयियः फढखच्छघां प्रत्ययादीनाम्, 7.3.50 ठस्येकः).
 const TADDHITA_REPLACED: Record<string, string> = { 'फ्': '7.1.2', 'ढ्': '7.1.2', 'ख्': '7.1.2', 'छ्': '7.1.2', 'घ्': '7.1.2', 'ठ्': '7.3.50' };
+// In any affix, initial झ् छ् ठ् ढ् escape 1.3.7 because later rules replace them (as vidyut does).
+const AFFIX_REPLACED: Record<string, string> = { 'झ्': '7.1.3', 'छ्': '7.1.2', 'ठ्': '7.3.50', 'ढ्': '7.1.2' };
+// The lakāras (लँट् … लृँङ्): their ल् stands for all of them in 3.4.77 लस्य.
+const LAKARA = /^ल्(अँ|इँ|उँ|ऋँ|एँ|ओँ|अ)(ट्|ङ्)$/;
 
 /** Split a Devanagari upadeśa into sounds and mark which are its. */
 export function detectIts(upadesha: string, ctx: ItContext): ItUnit[] {
@@ -69,9 +85,12 @@ export function detectIts(upadesha: string, ctx: ItContext): ItUnit[] {
 	if (isAffix && units.length > 1) {
 		const v = units[0].v;
 		if (ctx === 'taddhita' && TADDHITA_REPLACED[v]) units[0].kept = TADDHITA_REPLACED[v];
-		else if (ctx === 'vibhakti' && v === 'झ्') units[0].kept = '7.1.3';
-		else if (v === 'ष्') mark(0, '1.3.6');
-		else if (CU.has(v) || TTU.has(v)) mark(0, '1.3.7');
+		else if (AFFIX_REPLACED[v]) units[0].kept = AFFIX_REPLACED[v];
+		else if (ctx === 'pratyaya' && LAKARA.test(units.map((u) => u.v).join(''))) units[0].kept = '3.4.77';
+		else if (v === 'ष्') {
+			mark(0, '1.3.6');
+			if (units[1].v === 'ट्') units[1].as = 'त्'; // ष्ट्रन्: the ट् is a त् assimilated to ष् (8.4.41)
+		} else if (CU.has(v) || TTU.has(v)) mark(0, '1.3.7');
 		else if (ctx !== 'taddhita' && (v === 'ल्' || v === 'श्' || KU.has(v))) mark(0, '1.3.8');
 	}
 	// 1.3.3 (blocked by 1.3.4 in vibhaktis)
@@ -79,13 +98,20 @@ export function detectIts(upadesha: string, ctx: ItContext): ItUnit[] {
 		if (ctx === 'vibhakti' && (TU.has(units[last].v) || units[last].v === 'स्' || units[last].v === 'म्')) units[last].kept = '1.3.4';
 		else mark(last, '1.3.3');
 	}
-	// 1.3.2: nasalised vowels
-	units.forEach((u, i) => u.v.endsWith(NASAL) && mark(i, '1.3.2'));
+	// 1.3.2: nasalised vowels, except the उँ of an affix's यु/वु, which 7.1.1 needs
+	units.forEach((u, i) => {
+		if (!u.v.endsWith(NASAL)) return;
+		if (isAffix && u.v === 'उँ' && (units[i - 1]?.v === 'य्' || units[i - 1]?.v === 'व्')) u.kept = '7.1.1';
+		else mark(i, '1.3.2');
+	});
 	return units;
 }
 
+/** fromVarnas that also joins nasal vowels: [व्, उँ] → वुँ. */
+export const joinVarnas = (vs: string[]) => fromVarnas(vs.flatMap((v) => (v.length === 2 && v.endsWith(NASAL) ? [v[0], NASAL] : [v])));
+
 /** What is left after 1.3.9 deletes the its. */
-export const stripIts = (units: ItUnit[]) => fromVarnas(units.filter((u) => !u.it).map((u) => u.v));
+export const stripIts = (units: ItUnit[]) => joinVarnas(units.filter((u) => !u.it).map((u) => u.as ?? u.v));
 
 /** Name of the marker as used in the grammar: क् → "kit", डु → "ḍvit", इँ → "idit". */
 export function itName(units: ItUnit[], i: number): string | null {

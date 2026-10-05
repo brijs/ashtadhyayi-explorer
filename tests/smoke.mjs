@@ -124,7 +124,7 @@ for (const [label, viewport] of [['desktop', { width: 1280, height: 800 }], ['mo
 }
 
 // Explainers: walk every scene, exercise one interaction, screenshot some.
-const SHOTS = { 'shiva-sutras': ['rule', 'iko-yanaci'], anatomy: ['operators', 'run', 'nearest'], anuvritti: ['flow', 'headings', 'assemble'], 'rewrite-rules': ['machine', 'tests', 'order', 'automaton'], 'it-markers': ['detect', 'effects', 'flags'], 'nearest-substitute': ['map', 'union', 'effort'], 'sutra-types': ['verse', 'sort', 'counts', 'niyama'], conflict: ['clash', 'apavada', 'ladder'], asiddha: ['split', 'rajabhih', 'passes'], prakriya: ['ending', 'sandhi', 'review'], compression: ['ranges', 'bitsets', 'optimal', 'zero'], metarules: ['parse', 'where', 'loop'], grammars: ['bnf', 'karaka', 'limits'], ordering: ['css', 'elsewhere', 'counterfeeding'], 'write-a-sutra': ['yan', 'jas', 'sandbox'] };
+const SHOTS = { 'shiva-sutras': ['rule', 'iko-yanaci'], anatomy: ['operators', 'run', 'nearest'], anuvritti: ['flow', 'headings', 'assemble'], 'rewrite-rules': ['machine', 'tests', 'order', 'automaton'], 'it-markers': ['detect', 'flow', 'effects', 'flags'], 'nearest-substitute': ['map', 'union', 'effort'], 'sutra-types': ['verse', 'sort', 'counts', 'niyama'], conflict: ['clash', 'apavada', 'ladder'], asiddha: ['split', 'rajabhih', 'passes'], prakriya: ['ending', 'sandhi', 'review'], compression: ['ranges', 'bitsets', 'optimal', 'zero'], metarules: ['parse', 'where', 'loop'], grammars: ['bnf', 'karaka', 'limits'], ordering: ['css', 'elsewhere', 'counterfeeding'], 'write-a-sutra': ['yan', 'jas', 'sandbox'] };
 const SECTION = { 'rewrite-rules': 'cs', compression: 'cs', metarules: 'cs', grammars: 'cs', ordering: 'cs', 'write-a-sutra': 'cs' };
 for (const [label, viewport] of [['desktop', { width: 1280, height: 800 }], ['mobile', { width: 390, height: 800 }]]) {
 	for (const slug of Object.keys(SHOTS)) {
@@ -199,6 +199,15 @@ async function exercise(page, slug, id) {
 	if (slug === 'it-markers') {
 		if (id === 'tags') { for (let k = 0; k < 3; k++) await scene.locator('.piece').nth(k).click(); }
 		if (id === 'detect') { for (const k of [1, 4, 6, 7]) await scene.locator('.list button').nth(k).click(); }
+		if (id === 'flow') {
+			// step once, run the rest, then a second upadeśa (two finished runs complete the scene)
+			await scene.getByRole('button', { name: 'Start' }).click();
+			await scene.getByRole('button', { name: 'Run all' }).click();
+			await scene.locator('.list button').nth(2).click();
+			await scene.getByRole('button', { name: 'Run all' }).click();
+			const r = (await scene.locator('.res b').textContent())?.trim();
+			if (r !== 'अस्') problems.push(`[it-markers/flow] जस् gave ${r}, expected अस्`);
+		}
 		if (id === 'strip') await scene.locator('.btn').first().click();
 		if (id === 'effects') { for (let k = 0; k < 3; k++) await scene.locator('.aff').nth(k).click(); }
 		if (id === 'flags') { for (let k = 0; k < 3; k++) await scene.locator('.b').nth(k).click(); }
@@ -347,6 +356,48 @@ await run('tool-pratyahara', { width: 1280, height: 800 }, async (page) => {
 	await page.locator('.probe button').nth(1).click();
 	await shot(page, 'tool-pratyahara');
 });
+
+// --- it-letters ---
+for (const [label, viewport, dark] of [['desktop', { width: 1280, height: 800 }, false], ['mobile', { width: 390, height: 800 }, false], ['dark', { width: 1280, height: 800 }, true]]) {
+	await run(`tool-anubandha-${label}`, viewport, async (page) => {
+		await page.goto(`${BASE}/tools/anubandha/#ctx=pratyaya&u=${encodeURIComponent('ण्वुल्')}`);
+		await page.waitForLoadState('networkidle');
+		await page.waitForTimeout(300);
+		const res = async () => (await page.locator('.out .res .v').textContent())?.trim();
+		if ((await res()) !== 'वु') problems.push(`[tool-anubandha] ण्वुल् gave ${await res()}`);
+		// a dhātu from the Dhātupāṭha
+		await page.getByRole('tab', { name: 'Dhātus' }).click();
+		await page.getByRole('textbox', { name: 'Search dhātus' }).fill('कृञ्');
+		await page.locator('.picks .chip', { hasText: 'डुकृञ्' }).first().click();
+		if ((await res()) !== 'कृ') problems.push(`[tool-anubandha] डुकृञ् gave ${await res()}`);
+		if (!(await page.locator('.trace .st.fired', { hasText: '1.3.5' }).count())) problems.push('[tool-anubandha] डुकृञ्: 1.3.5 not shown as applying');
+		// an affix, and a case ending where 1.3.4 keeps the final स्
+		await page.getByRole('tab', { name: 'Kṛt affixes' }).click();
+		await page.locator('.picks .chip', { hasText: 'क्त्वा' }).first().click();
+		if ((await res()) !== 'त्वा') problems.push(`[tool-anubandha] क्त्वा gave ${await res()}`);
+		await page.getByRole('tab', { name: 'Sup' }).click();
+		await page.locator('.picks .chip', { hasText: /^जस्$/ }).click();
+		if ((await res()) !== 'अस्' || !(await page.locator('.tile.kept').count())) problems.push(`[tool-anubandha] जस् gave ${await res()}`);
+		if (!page.url().includes('ctx=vibhakti')) problems.push(`[tool-anubandha] hash not updated: ${page.url()}`);
+		results.push(`   it-letter finder (${label}): ण्वुल्→वु, डुकृञ्→कृ, क्त्वा→त्वा, जस्→अस्`);
+		await page.locator('.out').scrollIntoViewIfNeeded();
+		await shot(page, `tool-anubandha-${label}`);
+	}, { dark });
+	await run(`sutra-it-letters-${label}`, viewport, async (page) => {
+		await page.goto(`${BASE}/sutra/3.1.133/`);
+		await page.waitForLoadState('networkidle');
+		await page.waitForTimeout(400);
+		if (!(await page.locator('.it-tip').count())) problems.push('[sutra-it-letters] no it-letter legend on 3.1.133');
+		const trig = page.locator('.chip .it-trigger').first();
+		if (label === 'mobile') await trig.click();
+		else await trig.hover();
+		await page.locator('.pop').waitFor();
+		const txt = await page.locator('.pop').textContent();
+		if (!txt?.includes('1.3.7')) problems.push(`[sutra-it-letters] ण् card does not cite 1.3.7: ${txt}`);
+		await page.waitForTimeout(250);
+		await shot(page, `sutra-it-letters-${label}`);
+	}, { dark });
+}
 
 await run('dark-sutra', { width: 1280, height: 800 }, async (page) => {
 	await page.goto(`${BASE}/sutra/1.1.1/`);

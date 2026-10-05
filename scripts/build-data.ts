@@ -7,7 +7,9 @@
 import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { devaToIast, asciiDigits } from '../src/lib/translit.ts';
-import { pratyahara, splitPratyaharaName } from '../src/lib/varna.ts';
+import { pratyahara, splitPratyaharaName, toVarnas, fromVarnas } from '../src/lib/varna.ts';
+import { detectIts, stripIts, type ItContext } from '../src/lib/it.ts';
+import { harvestAll, enumNames, type Harvested } from './it-harvest.ts';
 import { slp1ToDeva } from '../src/lib/slp1.ts';
 import { LAKARAS, PURUSHAS, VACANAS, VIBHAKTIS } from '../src/lib/vidyut-enums.ts';
 
@@ -142,7 +144,7 @@ function matchTerm(part: string): string | undefined {
 	return undefined;
 }
 
-type Pada = { w: string; iast: string; kind: 'S' | 'T'; vib: string; vac: string; role: string; parts: { w: string; term?: string }[] };
+type Pada = { w: string; iast: string; kind: 'S' | 'T'; vib: string; vac: string; role: string; parts: { w: string; term?: string; it?: ItContext; u?: string; end?: string }[] };
 const termUsage = new Map<string, Set<string>>();
 function parsePc(id: string, pc: string, operational: boolean): Pada[] {
 	const roles = operational ? ROLE_BY_VIBHAKTI : NEUTRAL_ROLE_BY_VIBHAKTI;
@@ -375,6 +377,90 @@ for (const [id, list] of examples) {
 	full[id].examples = list.sort((a, b) => a.steps - b.steps).slice(0, 4).map(({ w, h, d }) => ({ w, h, d }));
 }
 
+// ---------- it-letters inside sūtras ----------
+// Mark pada parts that are upadeśas (affixes, augments) so the UI can colour their it-letters.
+// Conservative: a part is marked only if vidyut processes that exact upadeśa somewhere and our detector
+// (src/lib/it.ts), run in the context implied by where the sūtra sits, deletes exactly what vidyut deletes.
+const harvested = harvestAll(vidyut, {
+	krt: enumNames(readFileSync(join(wasmDir, 'vidyut_prakriya.d.ts'), 'utf8'), 'BaseKrt'),
+	taddhita: enumNames(readFileSync(join(wasmDir, 'vidyut_prakriya.d.ts'), 'utf8'), 'Taddhita')
+});
+const plainKey = (s: string) => s.replace(/ँ/g, '');
+const lexicon = new Map<string, Harvested[]>();
+for (const e of harvested) {
+	const list = lexicon.get(plainKey(e.u)) ?? [];
+	if (!list.some((x) => x.u === e.u && x.done === e.done && x.by === e.by)) list.push(e);
+	lexicon.set(plainKey(e.u), list);
+}
+const inScope = (headN: string, id: string) => {
+	const a = adhikaras.find((x) => x.n === headN)!;
+	return +id >= +a.from && +id <= +a.to;
+};
+// Nominative-case forms a final compound member may show: bare (अण्), dual (तृचौ), plural (अचः, छाः), singular (छः).
+function stems(w: string, last: boolean): string[] {
+	if (!last) return [w];
+	const out = [w];
+	const m = w.match(/^(.*[क-ह])([ािीुूृेैोौ]?)(ः|)$/);
+	if (m && (m[2] || m[3])) {
+		out.push(m[1] + '्'); // consonant stem: तृचौ → तृच्, अचः → अच्
+		if (m[2] === '' && m[3]) out.push(m[1]); // a-stem: छः → छ
+		if (m[2] === 'ौ' || m[2] === 'ा') out.push(m[1]); // a-stem dual/plural: छौ, छाः → छ
+		if (m[3] && m[2] && m[2] !== 'ा' && m[2] !== 'ौ') out.push(m[1] + m[2]); // i/u-stems: णिनिः → णिनि
+	}
+	return [...new Set(out)];
+}
+const affixRule = (code: string) => {
+	const [a, p, k] = code.split('.').map(Number);
+	const id = idFromApn(`${a}.${p}.${k}`);
+	return byId.has(id) && inScope('3.1.1', id);
+};
+const itStats = { vibhakti: 0, pratyaya: 0, taddhita: 0, other: 0 };
+const itSample: string[] = [];
+for (const id of ids) {
+	const f = full[id];
+	const listSutra = f.n === '4.1.2' || f.n === '3.4.78';
+	const krtOrTad = inScope('3.1.1', id);
+	if (!listSutra && !krtOrTad && !harvested.some((e) => e.by === f.n)) continue;
+	const tinRegion = f.a === 3 && f.p === 4 && f.k >= 78 && f.k <= 112; // tiṅ, their substitutes and augments
+	const affixCtx: ItContext = inScope('4.1.76', id) ? 'taddhita' : 'pratyaya';
+	// contexts to try, in order; an augment (introduced outside the affix headings) may also appear inside them
+	const ladderFor = (e: Harvested): ItContext[] =>
+		tinRegion ? ['vibhakti', 'agama', 'pratyaya']
+		: krtOrTad ? (affixRule(e.by) ? [affixCtx] : [affixCtx, 'agama'])
+		: ['agama', 'pratyaya', 'vibhakti', 'dhatu'];
+	for (const pada of f.pc as Pada[]) {
+		if (pada.kind !== 'S' || pada.vib !== '1') continue;
+		pada.parts.forEach((part, i) => {
+			if (listSutra) {
+				// sup and tiṅ lists: every member is a vibhakti (checked against vidyut in check-its.ts)
+				part.it = 'vibhakti';
+				itStats.vibhakti++;
+				return;
+			}
+			for (const cand of stems(part.w, i === pada.parts.length - 1)) {
+				// inside the affix headings any attested upadeśa counts; elsewhere only one vidyut introduces by this very rule
+				const entries = (lexicon.get(plainKey(cand)) ?? []).filter((e) => e.by === f.n || (krtOrTad && (!tinRegion || e.kind === 'tin'))).sort((a, b) => +(b.by === f.n) - +(a.by === f.n));
+				for (const e of entries) {
+					const ctx = ladderFor(e).find((c) => {
+						const units = detectIts(e.u, c);
+						return stripIts(units) === e.done && units.some((u) => u.it || u.kept);
+					});
+					if (!ctx) continue;
+					part.it = ctx;
+					if (e.u !== part.w) part.u = e.u;
+					const pv = toVarnas(part.w), sv = toVarnas(plainKey(e.u));
+					let k = 0;
+					while (k < sv.length && plainKey(pv[k] ?? '') === sv[k]) k++;
+					if (k < pv.length) part.end = fromVarnas(pv.slice(k));
+					itStats[ctx === 'taddhita' ? 'taddhita' : ctx === 'pratyaya' ? 'pratyaya' : 'other']++;
+					if (itSample.length < 400) itSample.push(`${f.n} ${part.w}→${e.u}${part.end ? ` (+${part.end})` : ''} [${ctx}] ⇒ ${e.done}`);
+					return;
+				}
+			}
+		});
+	}
+}
+
 const ruleTexts: Record<string, Record<string, string>> = {};
 for (const [src, file] of [['varttika', 'varttikas'], ['kashika', 'kashika'], ['kaumudi', 'kaumudi'], ['linganushasanam', 'linganushasanam'], ['unadi', 'unadipatha'], ['dhatupatha', 'dhatupatha-ganasutras']]) {
 	ruleTexts[src] = Object.fromEntries(tsv(file).map(([c, t]) => [c, slp1ToDeva(t ?? '')]));
@@ -419,4 +505,6 @@ const chips = Object.values(full).flatMap((f: any) => f.pc.flatMap((p: Pada) => 
 console.log(`✓ ${raw.length} sūtras · ${terms.size} terms · ${adhikaras.length} adhikāra scopes · ${chips.filter((c) => c.term).length}/${chips.length} pada parts linked to terms`);
 console.log(`  types: ${JSON.stringify(typeCounts)} · ${dhatus.length} dhātus`);
 console.log(`  ${derived} sample derivations → live examples for ${examples.size} sūtras`);
+console.log(`  it-letters: ${harvested.length} vidyut it-steps → ${lexicon.size} upadeśas; pada parts marked: ${JSON.stringify(itStats)}`);
+if (process.env.IT_SAMPLE) console.log('  ' + itSample.join('\n  '));
 if (pratyMismatch.length) console.log(`  note: computed pratyāhāra ≠ listed for: ${pratyMismatch.join(' ')}`);
