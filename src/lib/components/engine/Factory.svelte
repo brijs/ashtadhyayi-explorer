@@ -112,7 +112,7 @@
 	canvas {
 		display: block;
 		width: 100%;
-		height: clamp(230px, 42vw, 440px);
+		height: clamp(190px, 40vw, 440px);
 	}
 	.overlay {
 		position: absolute;
@@ -245,6 +245,12 @@
 		}
 		.overlay :global(.f-form) {
 			font-size: 14px;
+		}
+		.overlay :global(.f-glass) {
+			font-size: 0;
+		}
+		.overlay :global(.f-glass b) {
+			font-size: 10px;
 		}
 	}
 </style>
