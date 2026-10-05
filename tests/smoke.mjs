@@ -405,10 +405,10 @@ for (const [label, viewport, opts] of [['desktop', { width: 1280, height: 800 },
 		if (label === 'mobile') {
 			for (let i = 0; i < 4; i++) await page.getByRole('button', { name: 'Zoom in' }).click();
 		} else {
-			await page.mouse.move(cx, cy);
+			await page.mouse.move(box.x + 8, box.y + box.height - 8);
 			await page.mouse.down();
-			await page.mouse.up(); // engage (empty-space click is harmless if it lands between cells)
-			if (/\/sutra\//.test(page.url())) await page.goBack();
+			await page.mouse.up(); // engage the map with a click on empty space (bottom-left corner)
+			await page.mouse.move(cx, cy);
 			for (let i = 0; i < 6; i++) { await page.mouse.wheel(0, -240); await page.waitForTimeout(40); }
 		}
 		const g0 = await map.locator('svg > g').getAttribute('transform');
@@ -420,14 +420,16 @@ for (const [label, viewport, opts] of [['desktop', { width: 1280, height: 800 },
 		if (g0 === g1) problems.push(`[engine-${label}] drag did not pan the map`);
 		await page.waitForTimeout(300);
 		await shot(page, `engine-map-zoomed-${label}`);
-		// hover then click a cell
-		const target = map.locator('.cells rect').nth(1200);
-		const tb = await target.boundingBox();
-		if (!tb || tb.x < box.x || tb.y < box.y || tb.x > box.x + box.width || tb.y > box.y + box.height) {
-			await page.getByRole('button', { name: 'Zoom to adhyāya 3' }).click();
-			await page.waitForTimeout(200);
-		}
-		const t2 = await map.locator('.cells rect').nth(1200).boundingBox();
+		// hover then click a cell: find one near the middle of the map view
+		const t2 = await page.evaluate(() => {
+			const r = document.querySelector('.map').getBoundingClientRect();
+			for (let y = r.y + r.height * 0.3; y < Math.min(r.bottom, innerHeight) - 4; y += 6) for (let x = r.x + r.width * 0.3; x < r.right - 4; x += 6) {
+				const el = document.elementFromPoint(x, y);
+				if (el && el.closest('.cells') && el.tagName.toLowerCase() === 'rect') { const b = el.getBoundingClientRect(); return { x: b.x, y: b.y, width: b.width, height: b.height }; }
+			}
+			return null;
+		});
+		if (!t2) throw new Error('no map cell under the view centre');
 		await page.mouse.move(t2.x + t2.width / 2, t2.y + t2.height / 2);
 		await page.waitForTimeout(150);
 		if (label !== 'mobile') {
@@ -436,7 +438,8 @@ for (const [label, viewport, opts] of [['desktop', { width: 1280, height: 800 },
 			await shot(page, `engine-map-tip-${label}`);
 		}
 		await page.mouse.click(t2.x + t2.width / 2, t2.y + t2.height / 2);
-		if (label === 'mobile') await page.locator('.map .tip a.open').click();
+		// touch devices get a card with an "Open" link first; a mouse click navigates directly
+		await page.waitForURL(/\/sutra\//, { timeout: 3000 }).catch(() => page.locator('.map .tip a.open').click());
 		await page.waitForURL(/\/sutra\/\d\.\d\.\d+\//);
 		results.push(`   engine map cell → ${new URL(page.url()).pathname}`);
 	}, opts);

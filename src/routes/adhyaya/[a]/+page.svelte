@@ -45,7 +45,7 @@
 			{#if data.summary.headingSpans.some((h) => h.toN)}
 				<p class="heads">
 					Headings:
-					{#each data.summary.headingSpans.filter((h) => h.toN) as h, i (h.n)}{#if i}; {/if}<SutraRef n={h.n} s={h.s} /> <span class="muted">→ {h.toN}</span>{/each}
+					{#each data.summary.headingSpans.filter((h) => h.toN) as h, i (h.n)}{i ? '; ' : ''}<SutraRef n={h.n} s={h.s} /> <span class="muted">→ {h.toN}</span>{/each}
 				</p>
 			{/if}
 			<ol class="psum">

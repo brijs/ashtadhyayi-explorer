@@ -18,12 +18,13 @@ export const BANDS: Record<Band, { label: string; short: string; blurb: string }
 export const BAND_ORDER: Band[] = ['defs', 'case', 'verbal', 'nominal', 'stem', 'pada', 'tri'];
 
 export type Key = { n: string; why: string };
-export type AdhyayaInfo = { a: number; band: Band; title: string; summary: string; headings: string[]; keys: Key[] };
+export type AdhyayaInfo = { a: number; band: Band; title: string; short: string; summary: string; headings: string[]; keys: Key[] };
 export type PadaInfo = { a: number; p: number; band: Band; title: string; summary: string; keys: Key[] };
 
 export const ADHYAYAS: AdhyayaInfo[] = [
 	{
 		a: 1,
+		short: 'Definitions',
 		band: 'defs',
 		title: 'Definitions & metarules',
 		summary:
@@ -38,6 +39,7 @@ export const ADHYAYAS: AdhyayaInfo[] = [
 	},
 	{
 		a: 2,
+		short: 'Compounds & case',
 		band: 'case',
 		title: 'Compounds, case & deletions',
 		summary:
@@ -51,6 +53,7 @@ export const ADHYAYAS: AdhyayaInfo[] = [
 	},
 	{
 		a: 3,
+		short: 'Root affixes',
 		band: 'verbal',
 		title: 'Affixes after roots',
 		summary:
@@ -65,6 +68,7 @@ export const ADHYAYAS: AdhyayaInfo[] = [
 	},
 	{
 		a: 4,
+		short: 'Stem affixes I',
 		band: 'nominal',
 		title: 'Affixes after stems (I)',
 		summary:
@@ -78,6 +82,7 @@ export const ADHYAYAS: AdhyayaInfo[] = [
 	},
 	{
 		a: 5,
+		short: 'Stem affixes II',
 		band: 'nominal',
 		title: 'Affixes after stems (II)',
 		summary:
@@ -91,6 +96,7 @@ export const ADHYAYAS: AdhyayaInfo[] = [
 	},
 	{
 		a: 6,
+		short: 'Stem operations I',
 		band: 'stem',
 		title: 'Reduplication, sandhi, accent, stem changes',
 		summary:
@@ -104,6 +110,7 @@ export const ADHYAYAS: AdhyayaInfo[] = [
 	},
 	{
 		a: 7,
+		short: 'Stem operations II',
 		band: 'stem',
 		title: 'Stem & affix operations (aṅga)',
 		summary:
@@ -117,6 +124,7 @@ export const ADHYAYAS: AdhyayaInfo[] = [
 	},
 	{
 		a: 8,
+		short: 'Sentence · Tripādī',
 		band: 'tri',
 		title: 'Words in the sentence, then the Tripādī',
 		summary:

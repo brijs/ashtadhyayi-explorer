@@ -264,14 +264,15 @@ export function createFactory(opts: FactoryOptions) {
 	let width = 1;
 	let height = 1;
 	function resize() {
+		widths.clear();
 		width = Math.max(1, canvas.clientWidth);
 		height = Math.max(1, canvas.clientHeight);
 		renderer.setSize(width, height, false);
 		camera.aspect = width / height;
 		// fit the whole line horizontally: wider distance on narrow screens
-		const span = stationX(8) - WAREHOUSE_X + 3.5;
+		const span = stationX(8) - WAREHOUSE_X + 3.4;
 		const hFov = 2 * Math.atan(Math.tan((camera.fov * Math.PI) / 360) * camera.aspect);
-		const dist = Math.max(13, span / 2 / Math.tan(hFov / 2) + 1.5);
+		const dist = Math.max(12, span / 2 / Math.tan(hFov / 2) + 0.6);
 		const dir = new Vector3(0, 0.52, 1).normalize();
 		baseCam.copy(target).addScaledVector(dir, dist);
 		camera.position.copy(baseCam);
@@ -336,13 +337,18 @@ export function createFactory(opts: FactoryOptions) {
 		formEl.textContent = st ? st.form : '';
 		tokenLabel.style.setProperty('--c', st && st.band !== 'outside' ? `var(--b-${st.band})` : 'var(--muted)');
 		for (const x of stations) x.label.classList.toggle('on', !!s && x === s);
+		widths.delete(tokenLabel);
 		kick();
 	}
 
 	const v = new Vector3();
+	const widths = new Map<HTMLElement, number>(); // label widths, cached (re-measured when the text changes)
 	function place(el: HTMLElement, p: Vector3) {
 		v.copy(p).project(camera);
-		const x = (v.x * 0.5 + 0.5) * width;
+		let w = widths.get(el);
+		if (w === undefined) widths.set(el, (w = el.offsetWidth));
+		const half = w / 2;
+		const x = Math.max(half + 4, Math.min(width - half - 4, (v.x * 0.5 + 0.5) * width));
 		const y = (-v.y * 0.5 + 0.5) * height;
 		el.style.transform = `translate(${x.toFixed(1)}px, ${y.toFixed(1)}px)`;
 		el.style.visibility = v.z < 1 ? 'visible' : 'hidden';
@@ -352,7 +358,6 @@ export function createFactory(opts: FactoryOptions) {
 		for (const s of stations) place(s.label, tmp.set(stationX(s.a), 0, 0.85));
 		place(glassLabel, tmp.set(glassX, 2.85, -0.5));
 		place(whLabel, tmp.set(WAREHOUSE_X, 1.95, -1.4));
-		place(slipLabel, tmp.set(slip.position.x, 0.4, slip.position.z + 0.2));
 		place(tokenLabel, tmp.copy(token.position).add(new Vector3(0, 0.45, 0)));
 	}
 

@@ -85,9 +85,11 @@
 	{#if mode === '2d'}
 		<FactoryFallback {steps} {idx} {stations} />
 	{:else}
-		<canvas bind:this={canvas} aria-label="3D assembly line: eight stations, one per adhyāya. The word token moves to the station whose rule fires at the current step."></canvas>
-		<div class="overlay" bind:this={overlay} aria-hidden="true"></div>
-		{#if mode === 'loading'}<p class="loading muted">Building the factory…</p>{/if}
+		<div class="stage">
+			<canvas bind:this={canvas} aria-label="3D assembly line: eight stations, one per adhyāya. The word token moves to the station whose rule fires at the current step."></canvas>
+			<div class="overlay" bind:this={overlay} aria-hidden="true"></div>
+			{#if mode === 'loading'}<p class="loading muted">Building the factory…</p>{/if}
+		</div>
 	{/if}
 	<p class="legend">
 		{#each ['defs', 'case', 'verbal', 'nominal', 'stem', 'tri'] as const as b (b)}
@@ -104,10 +106,13 @@
 		border: 1px solid var(--line);
 		overflow: hidden;
 	}
+	.stage {
+		position: relative;
+	}
 	canvas {
 		display: block;
 		width: 100%;
-		height: clamp(260px, 42vw, 440px);
+		height: clamp(230px, 42vw, 440px);
 	}
 	.overlay {
 		position: absolute;
@@ -198,10 +203,14 @@
 		line-height: 1.25;
 	}
 	.overlay :global(.f-slip) {
-		max-width: 180px;
+		max-width: 220px;
 		white-space: normal;
-		text-align: center;
-		translate: -50% 0;
+		text-align: left;
+		translate: none;
+		transform: none !important;
+		left: 10px;
+		top: auto;
+		bottom: 10px;
 		background: #fff6e0;
 		color: #5a4a2a;
 		border-color: #e6d4ac;
@@ -230,6 +239,7 @@
 	}
 	@media (max-width: 600px) {
 		.overlay :global(.f-station span),
+		.overlay :global(.f-wh span),
 		.overlay :global(.f-slip) {
 			display: none;
 		}

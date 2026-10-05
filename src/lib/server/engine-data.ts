@@ -42,14 +42,14 @@ const DEFS: Def[] = [
 	},
 	{
 		id: 'bubhushati', word: 'बुभूषति', iast: 'bubhūṣati', gloss: '"wants to be"', group: 'verb',
-		input: { base: 'root भू (01.0001) + desiderative', baseNote: 'bhū + san is itself a new dhātu by 3.1.32', intent: 'desire (san) · present · 3rd person · singular · active' },
+		input: { base: 'root भू (01.0001)', baseNote: 'bhū + san is itself a new dhātu by 3.1.32', intent: 'desire (san) · present · 3rd person · singular · active' },
 		illustrates: 'Two passes through the line. First the desiderative affix san (3.1.7) makes a new root: it is reduplicated (6.1.9) and the copy shortened (7.4.59), and 3.1.32 declares bubhūs- a dhātu. Then that root goes through the ordinary present-tense steps (3.2.123, 3.4.78, 3.1.68). The Tripādī turns s into ṣ (8.3.59) and bh into b (8.4.54).',
 		focus: ['3.1.7', '6.1.9', '7.4.59', '3.1.32', '3.2.123', '8.3.59'],
 		runs: [{ label: 'tiṅanta', spec: { t: ['01.0001', 'BU', 'Parasmaipada'] }, extra: { sanadi: ['san'] } }]
 	},
 	{
 		id: 'bhavayati', word: 'भावयति', iast: 'bhāvayati', gloss: '"causes to be, brings about"', group: 'verb',
-		input: { base: 'root भू (01.0001) + causative', baseNote: 'bhū + ṇic is a new dhātu by 3.1.32', intent: 'causative (ṇic) · present · 3rd person · singular · active' },
+		input: { base: 'root भू (01.0001)', baseNote: 'bhū + ṇic is a new dhātu by 3.1.32', intent: 'causative (ṇic) · present · 3rd person · singular · active' },
 		illustrates: 'The causative ṇic (3.1.26) has a ṇ marker, so the root vowel takes vṛddhi (7.2.115: bhū → bhau → bhāv). The new root bhāvi- then takes laṭ, tip and śap like any other, and its final i takes guṇa (7.3.84) and becomes ay (6.1.78).',
 		focus: ['3.1.26', '7.2.115', '3.1.32', '7.3.84', '6.1.78'],
 		runs: [{ label: 'tiṅanta', spec: { t: ['01.0001', 'BU'] }, extra: { sanadi: ['Ric'], want: 'BAvayati' } }]

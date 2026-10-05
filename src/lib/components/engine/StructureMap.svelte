@@ -9,7 +9,7 @@
 
 	// Zoomable, pannable map of all 3,983 sūtras: 8 columns (adhyāyas) → 4 pāda blocks → one cell per sūtra.
 	// Panning/zooming only changes one transform; cells are rendered once and recoloured by CSS classes.
-	type AdhyayaLite = { a: number; title: string; summary: string; padas: { p: number; title: string; summary: string }[] };
+	type AdhyayaLite = { a: number; title: string; short: string; summary: string; padas: { p: number; title: string; summary: string }[] };
 	let {
 		padaCounts,
 		types,
@@ -86,22 +86,43 @@
 		const kk = clampK(k);
 		view = { k: kk, x: (vw - w * kk) / 2 - x0 * kk, y: (vh - h * kk) / 2 - y0 * kk };
 	}
+	/** keep at least some of the map on screen */
+	function clampV(v: { k: number; x: number; y: number }) {
+		const m = 80;
+		return { k: v.k, x: Math.min(vw - m, Math.max(m - L.width * v.k, v.x)), y: Math.min(vh - m, Math.max(m - L.height * v.k, v.y)) };
+	}
 	const clampK = (k: number) => Math.max(fitK * 0.7, Math.min(16, k));
 	function reset() {
 		fitK = Math.min((vw - 16) / L.width, (vh - 16) / L.height);
 		fit(0, 0, L.width, L.height, 8);
+		// on narrow screens the map is width-limited: start at the top rather than centred
+		if ((vw - 16) / L.width < (vh - 16) / L.height) view = { ...view, y: 8 };
 	}
 	function zoomAt(f: number, sx: number, sy: number) {
 		const k = clampK(view.k * f);
 		const r = k / view.k;
-		view = { k, x: sx - (sx - view.x) * r, y: sy - (sy - view.y) * r };
+		view = clampV({ k, x: sx - (sx - view.x) * r, y: sy - (sy - view.y) * r });
 		scheduleVisible();
+	}
+	/** zoom around the middle of whatever part of the map is on screen (buttons, keys) */
+	function zoomCenter(f: number) {
+		const x0 = Math.max(0, view.x);
+		const x1 = Math.min(vw, view.x + L.width * view.k);
+		const y0 = Math.max(0, view.y);
+		const y1 = Math.min(vh, view.y + L.height * view.k);
+		zoomAt(f, x1 > x0 ? (x0 + x1) / 2 : vw / 2, y1 > y0 ? (y0 + y1) / 2 : vh / 2);
 	}
 	export function focusAdhyaya(a: number, p?: number) {
 		const bs = L.blocks.filter((b) => b.a === a && (!p || b.p === p));
 		const y0 = Math.min(...bs.map((b) => b.y - PADA_HEAD)) - (p ? 0 : TOP - 10);
 		const y1 = Math.max(...bs.map((b) => b.y + b.h));
-		fit(bs[0].x - 34, y0, COL_W + 44, y1 - y0, 12);
+		if (p) fit(bs[0].x - 34, y0, COL_W + 44, y1 - y0, 12);
+		else {
+			// a whole column is tall: fit its width (up to a readable zoom) and align to its top
+			const w = COL_W + 44;
+			const k = clampK(Math.min((vw - 24) / w, Math.max((vh - 24) / (y1 - y0), 1.5)));
+			view = { k, x: (vw - w * k) / 2 - (bs[0].x - 34) * k, y: 12 - y0 * k };
+		}
 		scheduleVisible();
 	}
 	export function focusIndices(ids: number[]) {
@@ -194,7 +215,7 @@
 			const cx = (a.x + b.x) / 2;
 			const cy = (a.y + b.y) / 2;
 			const r = k / pinch.k;
-			view = { k, x: cx - (pinch.cx - pinch.vx) * r, y: cy - (pinch.cy - pinch.vy) * r };
+			view = clampV({ k, x: cx - (pinch.cx - pinch.vx) * r, y: cy - (pinch.cy - pinch.vy) * r });
 			hover = null;
 			return;
 		}
@@ -203,7 +224,7 @@
 			const dy = p.y - drag.y;
 			if (!drag.moved && Math.hypot(dx, dy) > 5) drag.moved = true;
 			if (drag.moved) {
-				view = { ...view, x: drag.vx + dx, y: drag.vy + dy };
+				view = clampV({ ...view, x: drag.vx + dx, y: drag.vy + dy });
 				hover = null;
 				return;
 			}
@@ -248,7 +269,7 @@
 		}
 		e.preventDefault();
 		const p = local(e);
-		const f = Math.exp(-e.deltaY * (e.ctrlKey ? 0.01 : 0.0022));
+		const f = Math.exp(-Math.max(-300, Math.min(300, e.deltaY)) * (e.ctrlKey ? 0.01 : 0.0012));
 		zoomAt(f, p.x, p.y);
 		hover = null;
 	}
@@ -258,13 +279,13 @@
 	}
 	function onKey(e: KeyboardEvent) {
 		const step = 60;
-		if (e.key === '+' || e.key === '=') zoomAt(1.4, vw / 2, vh / 2);
-		else if (e.key === '-' || e.key === '_') zoomAt(1 / 1.4, vw / 2, vh / 2);
+		if (e.key === '+' || e.key === '=') zoomCenter(1.4);
+		else if (e.key === '-' || e.key === '_') zoomCenter(1 / 1.4);
 		else if (e.key === '0') reset();
-		else if (e.key === 'ArrowLeft') view = { ...view, x: view.x + step };
-		else if (e.key === 'ArrowRight') view = { ...view, x: view.x - step };
-		else if (e.key === 'ArrowUp') view = { ...view, y: view.y + step };
-		else if (e.key === 'ArrowDown') view = { ...view, y: view.y - step };
+		else if (e.key === 'ArrowLeft') view = clampV({ ...view, x: view.x + step });
+		else if (e.key === 'ArrowRight') view = clampV({ ...view, x: view.x - step });
+		else if (e.key === 'ArrowUp') view = clampV({ ...view, y: view.y + step });
+		else if (e.key === 'ArrowDown') view = clampV({ ...view, y: view.y - step });
 		else return;
 		e.preventDefault();
 		scheduleVisible();
@@ -339,8 +360,8 @@
 			{/each}
 		</div>
 		<div class="zoom">
-			<button class="btn" onclick={() => zoomAt(1.5, vw / 2, vh / 2)} aria-label="Zoom in">+</button>
-			<button class="btn" onclick={() => zoomAt(1 / 1.5, vw / 2, vh / 2)} aria-label="Zoom out">−</button>
+			<button class="btn" onclick={() => zoomCenter(1.5)} aria-label="Zoom in">+</button>
+			<button class="btn" onclick={() => zoomCenter(1 / 1.5)} aria-label="Zoom out">−</button>
 			<button class="btn" onclick={reset}>Reset</button>
 		</div>
 	</div>
@@ -385,7 +406,7 @@
 						{#each brackets as br (br.n)}
 							{#each br.segs as s, j (j)}
 								<line x1={s.x} x2={s.x} y1={s.y1} y2={s.y2} />
-								{#if j === 0}<circle cx={s.x} cy={s.y1 + 1} r="1.8" />{/if}
+								{#if j === 0}<circle cx={s.x} cy={s.y1 + 1} r={Math.min(1.8, 3.5 / view.k)} />{/if}
 							{/each}
 						{/each}
 					</g>
@@ -422,7 +443,7 @@
 				{@const colX = L.colX[ad.a - 1]}
 				<div class="alabel" style="left: {sx(colX)}px; top: {sy(10)}px; width: {COL_W * view.k}px; --fs: {Math.max(10, Math.min(15, 13 * view.k * 1.4))}px">
 					<b>{ad.a}</b>
-					{#if COL_W * view.k > 74}<span>{ad.title}</span>{/if}
+					{#if COL_W * view.k > 74}<span>{ad.short}</span>{/if}
 				</div>
 				{#if level >= 1}
 					{#each ad.padas as pd (pd.p)}
@@ -576,7 +597,8 @@
 	.mode-example .cells :global(rect) { fill-opacity: 0.55; }
 	.brackets line {
 		stroke: var(--t-AD);
-		stroke-width: 1.4;
+		stroke-width: 2;
+		vector-effect: non-scaling-stroke;
 		opacity: 0.75;
 	}
 	.brackets circle {
@@ -585,7 +607,10 @@
 	.hl rect {
 		fill: none;
 		stroke: var(--ink);
-		stroke-width: 1.3;
+		stroke-width: 2.5;
+		vector-effect: non-scaling-stroke;
+		paint-order: stroke;
+		filter: drop-shadow(0 0 1.5px var(--surface));
 	}
 	.hl rect.onmode.b-defs { fill: var(--b-defs); }
 	.hl rect.onmode.b-case { fill: var(--b-case); }
@@ -597,7 +622,8 @@
 	.hl .cur {
 		fill: none;
 		stroke: var(--saffron);
-		stroke-width: 2.4;
+		stroke-width: 3;
+		vector-effect: non-scaling-stroke;
 		animation: ring 1.4s ease-in-out infinite;
 		transform-box: fill-box;
 		transform-origin: center;
@@ -619,7 +645,7 @@
 		stroke-width: 0.5px;
 	}
 	.lv3 .nums text {
-		font-size: 2.8px;
+		font-size: 2.3px;
 	}
 	.mode-example .nums text,
 	.mode-heat .nums text {
@@ -770,8 +796,9 @@
 	}
 	@media (max-width: 600px) {
 		.map {
-			height: 62vh;
-			min-height: 340px;
+			height: 56vh;
+			min-height: 320px;
+			max-height: 460px;
 		}
 		.howto {
 			margin-left: 0;

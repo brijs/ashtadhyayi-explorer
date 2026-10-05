@@ -1,5 +1,5 @@
 // Geometry of the structure map: 8 columns (adhyāyas), each split into 4 pāda blocks of sūtra cells in text order.
-export const COLS = 12; // cells per row inside a pāda block
+export const COLS = 14; // cells per row inside a pāda block
 export const CELL = 10;
 export const PITCH = 12;
 export const COL_W = COLS * PITCH - (PITCH - CELL);

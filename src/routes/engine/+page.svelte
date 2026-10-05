@@ -253,7 +253,7 @@
 	<h2>Chapters and pādas</h2>
 	<p class="intro">
 		Eight adhyāyas of four pādas each. The colour is each part's main role in a derivation:
-		{#each Object.entries(BANDS) as [b, info], i (b)}{#if i}, {/if}<span class="bandname" style="color: var(--b-{b})">{info.short.toLowerCase()}</span>{/each}.
+		{#each Object.entries(BANDS) as [b, info], i (b)}{i ? ', ' : ''}<span class="bandname" style="color: var(--b-{b})">{info.short.toLowerCase()}</span>{/each}.
 	</p>
 	<div class="chgrid">
 		{#each st.adhyayas as ad (ad.a)}
