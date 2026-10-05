@@ -125,6 +125,9 @@ for (const [label, viewport] of [['desktop', { width: 1280, height: 800 }], ['mo
 
 // Explainers: walk every scene, exercise one interaction, screenshot some.
 const SHOTS = { 'shiva-sutras': ['rule', 'iko-yanaci'], anatomy: ['operators', 'run', 'nearest'], anuvritti: ['flow', 'headings', 'assemble'], 'rewrite-rules': ['machine', 'tests', 'order', 'automaton'], 'it-markers': ['detect', 'effects', 'flags'], 'nearest-substitute': ['map', 'union', 'effort'], 'sutra-types': ['verse', 'sort', 'counts', 'niyama'], conflict: ['clash', 'apavada', 'ladder'], asiddha: ['split', 'rajabhih', 'passes'], prakriya: ['ending', 'sandhi', 'review'], compression: ['ranges', 'bitsets', 'optimal', 'zero'], metarules: ['parse', 'where', 'loop'], grammars: ['bnf', 'karaka', 'limits'], ordering: ['css', 'elsewhere', 'counterfeeding'], 'write-a-sutra': ['yan', 'jas', 'sandbox'] };
+// --- dhātus ---
+SHOTS.dhatus = ['inputs', 'ganas', 'what-is', 'markers', 'krdanta', 'ganapatha', 'unadi', 'claims'];
+// --- /dhātus ---
 const SECTION = { 'rewrite-rules': 'cs', compression: 'cs', metarules: 'cs', grammars: 'cs', ordering: 'cs', 'write-a-sutra': 'cs' };
 for (const [label, viewport] of [['desktop', { width: 1280, height: 800 }], ['mobile', { width: 390, height: 800 }]]) {
 	for (const slug of Object.keys(SHOTS)) {
@@ -268,6 +271,18 @@ async function exercise(page, slug, id) {
 		if (id === 'jas') { await sel(0).selectOption('झल्'); await sel(1).selectOption('जश्'); await sel(3).selectOption('END'); }
 		if (id === 'sandbox') { await sel(0).selectOption('इक्'); await sel(1).selectOption('अक्'); await sel(3).selectOption('अच्'); }
 	}
+	// --- dhātus ---
+	if (slug === 'dhatus') {
+		if (id === 'inputs') { for (let k = 0; k < 3; k++) await scene.locator('button.mod').nth(k).click(); }
+		if (id === 'ganas') { for (const k of [0, 1]) await scene.locator('button.row').nth(k).click(); }
+		if (id === 'what-is') { for (const k of [1, 2]) await scene.locator('button.c').nth(k).click(); }
+		if (id === 'markers') { for (let k = 0; k < 3; k++) await scene.getByRole('button', { name: 'Decode' }).first().click(); }
+		if (id === 'krdanta') { for (let k = 0; k < 3; k++) await scene.locator('.aff').nth(k).click(); }
+		if (id === 'ganapatha') { const n = await scene.locator('.items li').count(); for (let k = 0; k < n; k++) await scene.locator('.items li').nth(k).locator('.btn').nth(k % 2).click(); }
+		if (id === 'unadi') { await scene.getByRole('button', { name: /Derive it/ }).click(); await scene.getByRole('button', { name: /Take it as given/ }).click(); await scene.getByRole('button', { name: /Derive it/ }).click(); }
+		if (id === 'claims') { const n = await scene.locator('.claims li').count(); for (let k = 0; k < n; k++) await scene.locator('.claims li').nth(k).locator('.btn').first().click(); }
+	}
+	// --- /dhātus ---
 	if (id === 'quiz' || id === 'reflect' || (slug === 'prakriya' && id === 'review')) {
 		for (let q = 0; q < 6; q++) {
 			if (!(await scene.locator('.opt').count())) break;
@@ -347,6 +362,54 @@ await run('tool-pratyahara', { width: 1280, height: 800 }, async (page) => {
 	await page.locator('.probe button').nth(1).click();
 	await shot(page, 'tool-pratyahara');
 });
+
+// --- dhātus ---
+for (const [label, viewport, dark] of [['desktop', { width: 1280, height: 800 }, false], ['mobile', { width: 390, height: 800 }, false], ['dark', { width: 1280, height: 800 }, true]]) {
+	await run(`tool-dhatupatha-${label}`, viewport, async (page) => {
+		await page.goto(`${BASE}/tools/dhatupatha/`);
+		await page.locator('.rows .row').first().waitFor({ timeout: 15000 });
+		const total = await page.locator('.count').textContent();
+		if (!/2,229 roots/.test(total ?? '')) problems.push(`[tool-dhatupatha] total ${total}`);
+		await page.locator('.chips .chip', { hasText: 'दिवादि' }).click();
+		const div = (await page.locator('.count').textContent())?.trim();
+		results.push(`   dhātupāṭha divādi filter: ${div}`);
+		if (!/^161 roots/.test(div ?? '') || !page.url().endsWith('#Divadi')) problems.push(`[tool-dhatupatha] divādi filter gave "${div}" at ${page.url()}`);
+		await shot(page, `tool-dhatupatha-${label}`);
+		await page.locator('.chips .chip').first().click();
+		await page.getByRole('searchbox', { name: 'Search roots' }).fill('गम्');
+		const first = page.locator('.rows .row').first();
+		const nf = (await first.locator('.nf .deva').textContent())?.trim();
+		if (nf !== 'गम्') problems.push(`[tool-dhatupatha] search गम् first row ${nf}`);
+		if (label === 'mobile') await shot(page, 'tool-dhatupatha-search-mobile');
+		// a tag filter narrows the list
+		await page.getByRole('searchbox', { name: 'Search roots' }).fill('');
+		await page.locator('.chips.tags .chip').first().click();
+		const tagged = (await page.locator('.count').textContent())?.trim();
+		results.push(`   dhātupāṭha first tag filter: ${tagged}`);
+		await page.locator('.chips.tags .chip').first().click();
+		await page.getByRole('searchbox', { name: 'Search roots' }).fill('गम्');
+		await first.locator('a.go').click();
+		await page.waitForURL(/tools\/prakriya\/#t=01\.1137/);
+		await page.locator('.title h2').waitFor({ timeout: 15000 });
+		const h = (await page.locator('.title h2').textContent())?.trim();
+		results.push(`   गम् → derive → ${h}`);
+		if (h !== 'गच्छति') problems.push(`[tool-dhatupatha] derive link gave ${h}`);
+	}, { dark });
+}
+await run('dark-dhatus-lesson', { width: 1280, height: 800 }, async (page) => {
+	await page.goto(`${BASE}/learn/dhatus/#markers`);
+	await page.waitForLoadState('networkidle');
+	await page.waitForTimeout(400);
+	await page.getByRole('button', { name: 'Decode' }).first().click();
+	await shot(page, 'dark-dhatus-markers');
+	await page.goto(`${BASE}/learn/dhatus/#ganas`);
+	await page.reload();
+	await page.waitForLoadState('networkidle');
+	await page.waitForTimeout(400);
+	await page.locator('.scene button.row').nth(6).click();
+	await shot(page, 'dark-dhatus-ganas');
+}, { dark: true });
+// --- /dhātus ---
 
 await run('dark-sutra', { width: 1280, height: 800 }, async (page) => {
 	await page.goto(`${BASE}/sutra/1.1.1/`);
