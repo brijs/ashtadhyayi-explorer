@@ -3,6 +3,7 @@
 	import { devaToIast } from '#lib/translit.ts';
 	import { settings } from '#lib/settings.svelte.ts';
 	import TermPopover from './TermPopover.svelte';
+	import ItWord from './ItWord.svelte';
 
 	let { pada, terms, refs, showRole = true }: { pada: Pada; terms: Record<string, Term>; refs: Record<string, SutraStub>; showRole?: boolean } = $props();
 	const info = $derived(ROLE_INFO[pada.role]);
@@ -20,7 +21,10 @@
 	<span class="word deva">
 		{#each pada.parts as part, i (i)}
 			{#if i > 0}<span class="hy">-</span>{/if}
-			{#if part.term && terms[part.term]}
+			{#if part.it}
+				<!-- an upadeśa: its it-letters are coloured, each with the rule that marks it (takes precedence over a term link) -->
+				<ItWord text={part.u ?? part.w} ctx={part.it} />{#if part.end}<span class="end" title="case ending">{part.end}</span>{/if}
+			{:else if part.term && terms[part.term]}
 				<TermPopover term={terms[part.term]} {refs}>{part.w}</TermPopover>
 			{:else}
 				{part.w}
@@ -55,6 +59,11 @@
 		font-size: 24px;
 		line-height: 1.5;
 		color: var(--ink);
+	}
+	.end {
+		color: var(--muted);
+		font-size: 0.72em;
+		margin-left: 1px;
 	}
 	.hy {
 		color: var(--muted);

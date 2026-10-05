@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { sutraHref } from '#lib/links.ts';
-	import { detectIts, itName, stripIts, IT_RULES, IT_EFFECTS, type ItContext } from '#lib/it.ts';
-	import { fromVarnas } from '#lib/varna.ts';
+	import { detectIts, itName, stripIts, joinVarnas, IT_RULES, IT_EFFECTS, KEPT_RULES, type ItContext } from '#lib/it.ts';
 	import HoverCard from './HoverCard.svelte';
 
 	// An upadeśa with its it-letters (anubandhas) coloured; each it opens a card naming the rule that marks it.
@@ -17,7 +16,7 @@
 			if (prev && !u.it && !prev.it && !u.kept && !prev.kept) prev.text += '\u0000' + u.v;
 			else out.push({ text: u.v, it: u.it, kept: u.kept, start: i });
 		});
-		return out.map((g) => ({ ...g, text: fromVarnas(g.text.split('\u0000')) }));
+		return out.map((g) => ({ ...g, text: joinVarnas(g.text.split('\u0000')) }));
 	});
 	const href = (code: string) => sutraHref(code.split('.').slice(0, 3).join('.'));
 </script>
@@ -40,7 +39,13 @@
 				{/if}
 			</HoverCard>
 		{:else if g.kept}
-			<span class="kept" title="Not an it: {g.kept}">{g.text}</span>
+			<HoverCard label="kept sound {g.text}" underline={false}>
+				{#snippet trigger()}<span class="kept">{g.text}</span>{/snippet}
+				<span class="hd"><span class="big deva keptc">{g.text}</span> <span class="tag">not an it</span></span>
+				<a class="rule" href={href(g.kept)}><span class="n">{g.kept}</span> <span class="deva">{KEPT_RULES[g.kept]?.s}</span></a>
+				<span class="en">{KEPT_RULES[g.kept]?.en}</span>
+				<span class="en muted">So {g.text} stays: {KEPT_RULES[g.kept]?.why}.</span>
+			</HoverCard>
 		{:else}
 			<span>{g.text}</span>
 		{/if}
@@ -67,6 +72,9 @@
 		text-decoration: underline;
 		text-decoration-color: var(--r-subject);
 		text-underline-offset: 0.25em;
+	}
+	.keptc {
+		color: var(--r-subject);
 	}
 	.arrow {
 		color: var(--muted);
