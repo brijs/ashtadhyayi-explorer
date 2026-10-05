@@ -36,7 +36,7 @@
 			{/each}
 		</tbody>
 	</table>
-	<p class="next">See tags at work in any derivation: <a href={resolve('/tools/prakriya') + '/'}>derivation debugger</a>. Next lesson: <a href={resolve('/learn') + '/nearest-substitute/'}>The nearest substitute →</a></p>
+	<p class="next">Find the tags of any root or affix: <a href={resolve('/tools') + '/anubandha/'}>it-letter finder</a>. See tags at work in any derivation: <a href={resolve('/tools/prakriya') + '/'}>derivation debugger</a>. Next lesson: <a href={resolve('/learn') + '/nearest-substitute/'}>The nearest substitute →</a></p>
 </section>
 
 <style>

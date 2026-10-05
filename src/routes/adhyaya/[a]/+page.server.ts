@@ -1,5 +1,6 @@
 import { error } from '@sveltejs/kit';
 import { getCorpus } from '#lib/server/data.ts';
+import { adhyayaSummary } from '#lib/server/engine-data.ts';
 import type { EntryGenerator, PageServerLoad } from './$types';
 
 export const entries: EntryGenerator = () => [1, 2, 3, 4, 5, 6, 7, 8].map((a) => ({ a: String(a) }));
@@ -16,5 +17,5 @@ export const load: PageServerLoad = ({ params }) => {
 	}
 	// headings (adhikāras) that open in this adhyāya, to show as section markers
 	const headings = new Set(order.filter((id) => corpus[id].a === a && corpus[id].scope && corpus[id].types.some((t) => t.code === 'AD')));
-	return { a, padas, headings: [...headings] };
+	return { a, padas, headings: [...headings], summary: adhyayaSummary(a) };
 };

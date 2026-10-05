@@ -29,36 +29,55 @@ export type Derivation = { word: string; hash: string; steps: DStep[] };
 let vidyutP: Promise<any> | null = null;
 const vidyut = () => (vidyutP ??= vidyutNode());
 
-/** Run one vidyut derivation at prerender time and return it with sūtra texts attached. */
-async function derive(
-	spec: { t: [string, string, string?] } | { s: [string, string, string, string, boolean?] } | { k: [string, string] },
-	extra: Partial<{ lakara: string; purusha: string; vacana: string }> = {}
-): Promise<Derivation> {
+export type DeriveSpec =
+	| { t: [string, string, string?] }
+	| { s: [string, string, string, string, boolean?] }
+	| { k: [string, string] }
+	| { u: [string, string] }
+	| { tad: [string, string] };
+export type DeriveExtra = Partial<{ lakara: string; purusha: string; vacana: string; sanadi: string[]; prefixes: string[]; want: string }>;
+
+let dhatuList: { c: string; a: string; g: string; ag: string | null }[] | null = null;
+
+/**
+ * Run one vidyut derivation at prerender time and return it with sūtra texts attached.
+ * t = tiṅanta [dhātu code, label, pada?], s = subanta [stem, liṅga, vibhakti, vacana, nyāp?],
+ * k = kṛdanta [dhātu code, kṛt], u = uṇādi [dhātu code, uṇādi], tad = taddhitānta [stem, taddhita]. `want` (SLP1) picks among optional outputs.
+ */
+export async function derive(spec: DeriveSpec, extra: DeriveExtra = {}): Promise<Derivation> {
 	const v = await vidyut();
 	const { corpus, byApn } = getCorpus();
-	const dhatus: { c: string; a: string; g: string; ag: string | null }[] = JSON.parse(readFileSync(join(process.cwd(), 'static', 'data', 'dhatus.json'), 'utf8'));
+	dhatuList ??= JSON.parse(readFileSync(join(process.cwd(), 'static', 'data', 'dhatus.json'), 'utf8'));
 	const dh = (code: string) => {
-		const d = dhatus.find((x) => x.c === code)!;
-		return { aupadeshika: d.a, gana: d.g, antargana: d.ag, sanadi: [], prefixes: [] };
+		const d = dhatuList!.find((x) => x.c === code)!;
+		return { aupadeshika: d.a, gana: d.g, antargana: d.ag, sanadi: extra.sanadi ?? [], prefixes: extra.prefixes ?? [] };
 	};
+	// texts of non-Aṣṭādhyāyī steps (Uṇādi sūtras, Dhātupāṭha gaṇa-sūtras)
+	const otherTexts: Record<string, Record<string, string>> = readStatic('vidyut-rules.json');
 	let ps: any[];
-	let hash: string;
+	let hash = '';
 	if ('t' in spec) {
 		const [code, , pada] = spec.t;
 		const lakara = extra.lakara ?? 'Lat', purusha = extra.purusha ?? 'Prathama', vacana = extra.vacana ?? 'Eka';
 		ps = v.deriveTinantas({ dhatu: dh(code), lakara, prayoga: 'Kartari', purusha, vacana, skip_at_agama: false, pada: pada ?? null });
-		hash = `t=${code},${lakara},Kartari,${purusha},${vacana}${pada ? ',' + pada : ''}`;
+		// the debugger's hash has no slot for sanādi affixes or prefixes
+		if (!extra.sanadi?.length && !extra.prefixes?.length) hash = `t=${code},${lakara},Kartari,${purusha},${vacana}${pada ? ',' + pada : ''}`;
 	} else if ('s' in spec) {
 		const [stem, linga, vibhakti, vacana, nyap] = spec.s;
 		ps = v.deriveSubantas({ pratipadika: nyap ? { nyap: stem } : { basic: stem }, linga, vibhakti, vacana });
 		hash = `s=${stem},${linga},${vibhakti},${vacana}${nyap ? ',nyap' : ''}`;
-	} else {
+	} else if ('u' in spec) {
+		const [code, unadi] = spec.u;
+		ps = v.deriveKrdantas({ dhatu: dh(code), krt: null, unadi, lakara: null, prayoga: null, upapada: null });
+	} else if ('k' in spec) {
 		const [code, krt] = spec.k;
 		ps = v.deriveKrdantas({ dhatu: dh(code), krt, unadi: null, lakara: null, prayoga: null, upapada: null });
-		hash = '';
+	} else {
+		const [stem, taddhita] = spec.tad;
+		ps = v.deriveTaddhitantas({ pratipadika: { basic: stem }, taddhita });
 	}
-	const p = ps[0];
-	if (!p) throw new Error(`no derivation for ${JSON.stringify(spec)}`);
+	const p = extra.want ? ps.find((x) => x.text === extra.want) : ps[0];
+	if (!p) throw new Error(`no derivation for ${JSON.stringify(spec)}${extra.want ? ' giving ' + extra.want : ''}: got ${ps.map((x) => x.text).join('/')}`);
 	return {
 		word: slp1ToDeva(p.text),
 		hash,
@@ -67,7 +86,7 @@ async function derive(
 			return {
 				code: st.rule.code,
 				source: st.rule.source,
-				s: id ? corpus[id].s : '',
+				s: id ? corpus[id].s : (otherTexts[st.rule.source]?.[st.rule.code] ?? ''),
 				en: id ? corpus[id].en : '',
 				terms: st.result.map((t) => ({ t: slp1ToDeva(t.text), ch: t.wasChanged }))
 			};
@@ -76,6 +95,65 @@ async function derive(
 }
 
 const LOADERS: Record<string, Loader> = {
+	dhatus: async () => {
+		const { order } = getCorpus();
+		const list: { c: string; a: string; d: string; n: string; m: string; g: string; ag: string | null }[] = readStatic('dhatus.json');
+		const rules: Record<string, Record<string, string>> = readStatic('vidyut-rules.json');
+		const GANAS = ['Bhvadi', 'Adadi', 'Juhotyadi', 'Divadi', 'Svadi', 'Tudadi', 'Rudhadi', 'Tanadi', 'Kryadi', 'Curadi'];
+		const ganas = await Promise.all(
+			GANAS.map(async (g) => {
+				const roots = list.filter((d) => d.g === g);
+				const first = roots[0];
+				// parasmaipada where the root allows it, so the vikaraṇa is easy to see (भवति, चोरयति)
+				const ex = await derive({ t: [first.c, first.a, 'Parasmaipada'] }).catch(() => derive({ t: [first.c, first.a] }));
+				return { g, count: roots.length, sample: roots.slice(0, 8).map(({ c, d, m }) => ({ c, d, m })), first: { c: first.c, d: first.d }, form: ex.word, hash: ex.hash, codes: [...new Set(ex.steps.map((st) => st.code))] };
+			})
+		);
+		const unadiPadas: number[] = [];
+		for (const k of Object.keys(rules.unadi)) unadiPadas[+k.split('.')[0] - 1] = (unadiPadas[+k.split('.')[0] - 1] ?? 0) + 1;
+		const forms = async (code: string) => [...new Set((await Promise.all([undefined, 'Parasmaipada', 'Atmanepada'].map((p) => derive({ t: [code, '', p] }).then((x) => x.word).catch(() => null)))).filter(Boolean))];
+		return {
+			total: list.length,
+			distinctUpadesha: new Set(list.map((d) => d.a)).size,
+			distinctNormal: new Set(list.map((d) => d.n)).size,
+			sutraCount: order.length,
+			ganas,
+			s: ['1.1.71', '3.1.91', '1.3.1', '3.1.32', '1.2.45', '1.2.46', '1.1.27', '3.3.1', '3.4.75', '3.1.7', '3.1.26', '3.1.93', '3.1.133', '3.2.102', '1.3.12', '1.3.72', '1.3.78', '2.4.72', '2.4.75', '3.1.68', '3.1.69', '3.1.73', '3.1.77', '3.1.78', '3.1.79', '3.1.81', '3.1.25', '5.2.127', '4.1.4'].map(stubN),
+			pada: Object.fromEntries(await Promise.all(['01.0001', '01.0002', '08.0010', '01.0268', '01.1137', '01.1151'].map(async (c) => [c, await forms(c)]))),
+			// words that show a root's tags at work (each checked: the tag's sūtra fires in the derivation)
+			effects: Object.fromEntries(
+				await Promise.all(
+					([
+						['agamat', derive({ t: ['01.1137', ''] }, { lakara: 'Lun' }), '3.1.55'],
+						['sphurgna', derive({ k: ['01.0268', 'kta'] }), '8.2.45'],
+						['sphurjathu', derive({ k: ['01.0268', 'aTuc'] }), '3.3.89'],
+						['krtrima', derive({ k: ['08.0010', 'ktri'] }), '3.3.88']
+					] as const).map(async ([k, p, n]) => {
+						const x = await p;
+						return [k, { word: x.word, fired: x.steps.some((st) => st.code === n) }];
+					})
+				)
+			),
+			krt: {
+				pacaka: await derive({ k: ['01.1151', 'Rvul'] }),
+				kartr: await derive({ k: ['08.0010', 'tfc'] }),
+				gata: await derive({ k: ['01.1137', 'kta'] })
+			},
+			sanadi: {
+				bhavati: await derive({ t: ['01.0001', 'BU', 'Parasmaipada'] }),
+				bubhusati: await derive({ t: ['01.0001', 'BU'] }, { sanadi: ['san'] }),
+				bhavayati: await derive({ t: ['01.0001', 'BU', 'Parasmaipada'] }, { sanadi: ['Ric'] })
+			},
+			unadi: {
+				count: Object.keys(rules.unadi).length,
+				padas: unadiPadas,
+				texts: Object.fromEntries(['1.1', '1.149', '2.68'].map((k) => [k, rules.unadi[k]])),
+				go: await derive({ u: ['01.1137', 'qo'] }),
+				karu: await derive({ u: ['08.0010', 'uR'] })
+			},
+			linga: Object.keys(rules.linganushasanam).length
+		};
+	},
 	grammars: async () => ({ bhavati: await derive({ t: ['01.0001', 'BU', 'Parasmaipada'] }) }),
 	metarules: async () => {
 		const { corpus, byApn } = getCorpus();

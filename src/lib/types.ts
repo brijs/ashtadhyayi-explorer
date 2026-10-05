@@ -1,10 +1,16 @@
+import type { ItContext } from './it.ts';
+
 export type Role =
 	| 'target' | 'subject' | 'left' | 'right' | 'nom' | 'gen' | 'abl' | 'loc'
 	| 'object' | 'instrument' | 'purpose' | 'avyaya' | 'verb' | 'unknown';
 
-export type PadaPart = { w: string; term?: string };
+/** One member of a pada. `it`: the part is an upadeśa whose it-letters can be shown (checked against vidyut at
+ * build time); `u` its upadeśa spelling when it differs from `w` (nasal vowels marked, case ending removed);
+ * `end` the case ending that `w` adds to it. */
+export type PadaPart = { w: string; term?: string; it?: ItContext; u?: string; end?: string };
 export type Pada = { w: string; iast: string; kind: 'S' | 'T'; vib: string; vac: string; role: Role; parts: PadaPart[] };
-export type WordRef = { w: string; iast: string; id: string };
+/** A word carried in from another sūtra; `term` is the saṃjñā or pratyāhāra it names, as tagged in that sūtra. */
+export type WordRef = { w: string; iast: string; id: string; term?: string };
 export type SutraType = { code: 'V' | 'S' | 'P' | 'AD' | 'AT'; label: string };
 
 export type Prayoga = { word: string; text: string; loc: string; url: string; pada: string; ref: string };

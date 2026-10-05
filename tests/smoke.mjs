@@ -92,6 +92,19 @@ for (const [label, viewport] of [['desktop', { width: 1280, height: 800 }], ['mo
 		await page.waitForTimeout(700);
 		await page.locator('.anuvritti').scrollIntoViewIfNeeded();
 		await shot(page, `anuvritti-${label}`);
+		// 1.4.103 used to crash here: the upstream data repeats an inherited word (duplicate each-key)
+		await page.goto(`${BASE}/sutra/1.4.103/`);
+		await page.waitForLoadState('networkidle');
+		await page.waitForTimeout(400);
+		await page.getByRole('button', { name: /Fill in inherited words/ }).click();
+		await page.locator('.w.inherited').first().waitFor();
+		// term popover opens on hover too
+		await page.goto(`${BASE}/sutra/6.1.77/`);
+		await page.waitForLoadState('networkidle');
+		await page.waitForTimeout(400);
+		await page.locator('.chip .trigger').first().hover();
+		await page.locator('.pop').waitFor();
+		await page.mouse.move(0, 0);
 		// commentary tabs + a commentary cross-link (client-side navigation)
 		await page.goto(`${BASE}/sutra/6.1.77/`);
 		await page.waitForLoadState('networkidle');
@@ -103,6 +116,61 @@ for (const [label, viewport] of [['desktop', { width: 1280, height: 800 }], ['mo
 		await page.waitForURL(/sutra\/6\.1\.102\//);
 	});
 
+	// --- tables & pratyāhāra tooltips ---
+	await run(`tables-${label}`, viewport, async (page) => {
+		for (const [n, cells] of [['4.1.2', 21], ['3.4.78', 18]]) {
+			await page.goto(`${BASE}/sutra/${n}/`);
+			await page.waitForLoadState('networkidle');
+			await page.waitForTimeout(400);
+			// shown as a table by default; toggling hides and restores it
+			await page.locator('figure.implied').waitFor();
+			const got = await page.locator('figure.implied td .item').count();
+			if (got !== cells) problems.push(`[tables-${label}] ${n}: ${got} cells, expected ${cells}`);
+			await page.getByRole('button', { name: 'As written' }).click();
+			await page.locator('figure.implied').waitFor({ state: 'detached' });
+			await page.getByRole('button', { name: 'As a table' }).click();
+			await page.locator('figure.implied').scrollIntoViewIfNeeded();
+			await shot(page, `table-${n}-${label}`);
+		}
+		// an it-letter in a cell opens its card (जस्: ज् by 1.3.7)
+		await page.goto(`${BASE}/sutra/4.1.2/`);
+		await page.waitForLoadState('networkidle');
+		await page.waitForTimeout(400);
+		await page.locator('figure.implied .it-trigger').nth(2).click();
+		await page.locator('.pop').waitFor();
+		await page.keyboard.press('Escape');
+		// pratyāhāra card on 6.1.77: letters and Śiva-sūtra span
+		await page.goto(`${BASE}/sutra/6.1.77/`);
+		await page.waitForLoadState('networkidle');
+		await page.waitForTimeout(400);
+		await page.locator('.chip .pr-trigger').first().hover();
+		await page.locator('.pop .letters').waitFor();
+		const span = (await page.locator('.pop .span').textContent())?.replace(/\s+/g, ' ');
+		if (!span?.includes('ऋऌक्')) problems.push(`[tables-${label}] इक् card span: ${span}`);
+		await page.waitForTimeout(200);
+		await shot(page, `pratyahara-card-${label}`);
+		await page.mouse.move(0, 0);
+		await page.locator('figure.implied').scrollIntoViewIfNeeded();
+		await shot(page, `table-6.1.77-${label}`);
+		// an inherited pratyāhāra (अचि from 6.1.77 in 6.1.78) opens the same card
+		await page.goto(`${BASE}/sutra/6.1.78/`);
+		await page.waitForLoadState('networkidle');
+		await page.waitForTimeout(400);
+		await page.getByRole('button', { name: /Fill in inherited words/ }).click();
+		await page.locator('.w.inherited .pr-trigger').first().waitFor();
+		await page.waitForTimeout(600);
+		await page.locator('.w.inherited .pr-trigger').first().click();
+		await page.locator('.pop .letters').waitFor();
+		await shot(page, `inherited-pratyahara-${label}`);
+		await page.keyboard.press('Escape');
+		// a definition links to the table it sets up
+		await page.goto(`${BASE}/sutra/1.4.101/`);
+		await page.waitForLoadState('networkidle');
+		await page.locator('.table-links a').first().click();
+		await page.waitForURL(/sutra\/3\.4\.78\//);
+	});
+	// --- end tables & pratyāhāra tooltips ---
+
 	await run(`adhyaya-${label}`, viewport, async (page) => {
 		await page.goto(`${BASE}/adhyaya/1/`);
 		await page.getByRole('button', { name: 'Definitions' }).click();
@@ -111,7 +179,10 @@ for (const [label, viewport] of [['desktop', { width: 1280, height: 800 }], ['mo
 }
 
 // Explainers: walk every scene, exercise one interaction, screenshot some.
-const SHOTS = { 'shiva-sutras': ['rule', 'iko-yanaci'], anatomy: ['operators', 'run', 'nearest'], anuvritti: ['flow', 'headings', 'assemble'], 'rewrite-rules': ['machine', 'tests', 'order', 'automaton'], 'it-markers': ['detect', 'effects', 'flags'], 'nearest-substitute': ['map', 'union', 'effort'], 'sutra-types': ['verse', 'sort', 'counts', 'niyama'], conflict: ['clash', 'apavada', 'ladder'], asiddha: ['split', 'rajabhih', 'passes'], prakriya: ['ending', 'sandhi', 'review'], compression: ['ranges', 'bitsets', 'optimal', 'zero'], metarules: ['parse', 'where', 'loop'], grammars: ['bnf', 'karaka', 'limits'], ordering: ['css', 'elsewhere', 'counterfeeding'], 'write-a-sutra': ['yan', 'jas', 'sandbox'] };
+const SHOTS = { 'shiva-sutras': ['rule', 'iko-yanaci'], anatomy: ['operators', 'run', 'nearest'], anuvritti: ['flow', 'headings', 'assemble'], 'rewrite-rules': ['machine', 'tests', 'order', 'automaton'], 'it-markers': ['detect', 'flow', 'effects', 'flags'], 'nearest-substitute': ['map', 'union', 'effort'], 'sutra-types': ['verse', 'sort', 'counts', 'niyama'], conflict: ['clash', 'apavada', 'ladder'], asiddha: ['split', 'rajabhih', 'passes'], prakriya: ['ending', 'sandhi', 'review'], compression: ['ranges', 'bitsets', 'optimal', 'zero'], metarules: ['parse', 'where', 'loop'], grammars: ['bnf', 'karaka', 'limits'], ordering: ['css', 'elsewhere', 'counterfeeding'], 'write-a-sutra': ['yan', 'jas', 'sandbox'] };
+// --- dhātus ---
+SHOTS.dhatus = ['inputs', 'ganas', 'what-is', 'markers', 'krdanta', 'ganapatha', 'unadi', 'claims'];
+// --- /dhātus ---
 const SECTION = { 'rewrite-rules': 'cs', compression: 'cs', metarules: 'cs', grammars: 'cs', ordering: 'cs', 'write-a-sutra': 'cs' };
 for (const [label, viewport] of [['desktop', { width: 1280, height: 800 }], ['mobile', { width: 390, height: 800 }]]) {
 	for (const slug of Object.keys(SHOTS)) {
@@ -186,6 +257,15 @@ async function exercise(page, slug, id) {
 	if (slug === 'it-markers') {
 		if (id === 'tags') { for (let k = 0; k < 3; k++) await scene.locator('.piece').nth(k).click(); }
 		if (id === 'detect') { for (const k of [1, 4, 6, 7]) await scene.locator('.list button').nth(k).click(); }
+		if (id === 'flow') {
+			// step once, run the rest, then a second upadeśa (two finished runs complete the scene)
+			await scene.getByRole('button', { name: 'Start' }).click();
+			await scene.getByRole('button', { name: 'Run all' }).click();
+			await scene.locator('.list button').nth(2).click();
+			await scene.getByRole('button', { name: 'Run all' }).click();
+			const r = (await scene.locator('.res b').textContent())?.trim();
+			if (r !== 'अस्') problems.push(`[it-markers/flow] जस् gave ${r}, expected अस्`);
+		}
 		if (id === 'strip') await scene.locator('.btn').first().click();
 		if (id === 'effects') { for (let k = 0; k < 3; k++) await scene.locator('.aff').nth(k).click(); }
 		if (id === 'flags') { for (let k = 0; k < 3; k++) await scene.locator('.b').nth(k).click(); }
@@ -255,6 +335,18 @@ async function exercise(page, slug, id) {
 		if (id === 'jas') { await sel(0).selectOption('झल्'); await sel(1).selectOption('जश्'); await sel(3).selectOption('END'); }
 		if (id === 'sandbox') { await sel(0).selectOption('इक्'); await sel(1).selectOption('अक्'); await sel(3).selectOption('अच्'); }
 	}
+	// --- dhātus ---
+	if (slug === 'dhatus') {
+		if (id === 'inputs') { for (let k = 0; k < 3; k++) await scene.locator('button.mod').nth(k).click(); }
+		if (id === 'ganas') { for (const k of [0, 1]) await scene.locator('button.row').nth(k).click(); }
+		if (id === 'what-is') { for (const k of [1, 2]) await scene.locator('button.c').nth(k).click(); }
+		if (id === 'markers') { for (let k = 0; k < 3; k++) await scene.getByRole('button', { name: 'Decode' }).first().click(); }
+		if (id === 'krdanta') { for (let k = 0; k < 3; k++) await scene.locator('.aff').nth(k).click(); }
+		if (id === 'ganapatha') { const n = await scene.locator('.items li').count(); for (let k = 0; k < n; k++) await scene.locator('.items li').nth(k).locator('.btn').nth(k % 2).click(); }
+		if (id === 'unadi') { await scene.getByRole('button', { name: /Derive it/ }).click(); await scene.getByRole('button', { name: /Take it as given/ }).click(); await scene.getByRole('button', { name: /Derive it/ }).click(); }
+		if (id === 'claims') { const n = await scene.locator('.claims li').count(); for (let k = 0; k < n; k++) await scene.locator('.claims li').nth(k).locator('.btn').first().click(); }
+	}
+	// --- /dhātus ---
 	if (id === 'quiz' || id === 'reflect' || (slug === 'prakriya' && id === 'review')) {
 		for (let q = 0; q < 6; q++) {
 			if (!(await scene.locator('.opt').count())) break;
@@ -335,11 +427,111 @@ await run('tool-pratyahara', { width: 1280, height: 800 }, async (page) => {
 	await shot(page, 'tool-pratyahara');
 });
 
+// --- it-letters ---
+for (const [label, viewport, dark] of [['desktop', { width: 1280, height: 800 }, false], ['mobile', { width: 390, height: 800 }, false], ['dark', { width: 1280, height: 800 }, true]]) {
+	await run(`tool-anubandha-${label}`, viewport, async (page) => {
+		await page.goto(`${BASE}/tools/anubandha/#ctx=pratyaya&u=${encodeURIComponent('ण्वुल्')}`);
+		await page.waitForLoadState('networkidle');
+		await page.waitForTimeout(300);
+		const res = async () => (await page.locator('.out .res .v').textContent())?.trim();
+		if ((await res()) !== 'वु') problems.push(`[tool-anubandha] ण्वुल् gave ${await res()}`);
+		// a dhātu from the Dhātupāṭha
+		await page.getByRole('tab', { name: 'Dhātus' }).click();
+		await page.getByRole('textbox', { name: 'Search dhātus' }).fill('कृञ्');
+		await page.locator('.picks .chip', { hasText: 'डुकृञ्' }).first().click();
+		if ((await res()) !== 'कृ') problems.push(`[tool-anubandha] डुकृञ् gave ${await res()}`);
+		if (!(await page.locator('.trace .st.fired', { hasText: '1.3.5' }).count())) problems.push('[tool-anubandha] डुकृञ्: 1.3.5 not shown as applying');
+		// an affix, and a case ending where 1.3.4 keeps the final स्
+		await page.getByRole('tab', { name: 'Kṛt affixes' }).click();
+		await page.locator('.picks .chip', { hasText: 'क्त्वा' }).first().click();
+		if ((await res()) !== 'त्वा') problems.push(`[tool-anubandha] क्त्वा gave ${await res()}`);
+		await page.getByRole('tab', { name: 'Sup' }).click();
+		await page.locator('.picks .chip', { hasText: /^जस्$/ }).click();
+		if ((await res()) !== 'अस्' || !(await page.locator('.tile.kept').count())) problems.push(`[tool-anubandha] जस् gave ${await res()}`);
+		if (!page.url().includes('ctx=vibhakti')) problems.push(`[tool-anubandha] hash not updated: ${page.url()}`);
+		results.push(`   it-letter finder (${label}): ण्वुल्→वु, डुकृञ्→कृ, क्त्वा→त्वा, जस्→अस्`);
+		await page.locator('.out').scrollIntoViewIfNeeded();
+		await shot(page, `tool-anubandha-${label}`);
+	}, { dark });
+	await run(`sutra-it-letters-${label}`, viewport, async (page) => {
+		await page.goto(`${BASE}/sutra/3.1.133/`);
+		await page.waitForLoadState('networkidle');
+		await page.waitForTimeout(400);
+		if (!(await page.locator('.it-tip').count())) problems.push('[sutra-it-letters] no it-letter legend on 3.1.133');
+		const trig = page.locator('.chip .it-trigger').first();
+		if (label === 'mobile') await trig.click();
+		else await trig.hover();
+		await page.locator('.pop').waitFor();
+		const txt = await page.locator('.pop').textContent();
+		if (!txt?.includes('1.3.7')) problems.push(`[sutra-it-letters] ण् card does not cite 1.3.7: ${txt}`);
+		await page.waitForTimeout(250);
+		await shot(page, `sutra-it-letters-${label}`);
+	}, { dark });
+}
+// --- dhātus ---
+for (const [label, viewport, dark] of [['desktop', { width: 1280, height: 800 }, false], ['mobile', { width: 390, height: 800 }, false], ['dark', { width: 1280, height: 800 }, true]]) {
+	await run(`tool-dhatupatha-${label}`, viewport, async (page) => {
+		await page.goto(`${BASE}/tools/dhatupatha/`);
+		await page.locator('.rows .row').first().waitFor({ timeout: 15000 });
+		const total = await page.locator('.count').textContent();
+		if (!/2,229 roots/.test(total ?? '')) problems.push(`[tool-dhatupatha] total ${total}`);
+		await page.locator('.chips .chip', { hasText: 'दिवादि' }).click();
+		const div = (await page.locator('.count').textContent())?.trim();
+		results.push(`   dhātupāṭha divādi filter: ${div}`);
+		if (!/^161 roots/.test(div ?? '') || !page.url().endsWith('#Divadi')) problems.push(`[tool-dhatupatha] divādi filter gave "${div}" at ${page.url()}`);
+		await shot(page, `tool-dhatupatha-${label}`);
+		await page.locator('.chips .chip').first().click();
+		await page.getByRole('searchbox', { name: 'Search roots' }).fill('गम्');
+		const first = page.locator('.rows .row').first();
+		const nf = (await first.locator('.nf .deva').textContent())?.trim();
+		if (nf !== 'गम्') problems.push(`[tool-dhatupatha] search गम् first row ${nf}`);
+		if (label === 'mobile') await shot(page, 'tool-dhatupatha-search-mobile');
+		// a tag filter narrows the list
+		await page.getByRole('searchbox', { name: 'Search roots' }).fill('');
+		await page.locator('.chips.tags .chip').first().click();
+		const tagged = (await page.locator('.count').textContent())?.trim();
+		results.push(`   dhātupāṭha first tag filter: ${tagged}`);
+		await page.locator('.chips.tags .chip').first().click();
+		await page.getByRole('searchbox', { name: 'Search roots' }).fill('गम्');
+		await first.locator('a.go').click();
+		await page.waitForURL(/tools\/prakriya\/#t=01\.1137/);
+		await page.locator('.title h2').waitFor({ timeout: 15000 });
+		const h = (await page.locator('.title h2').textContent())?.trim();
+		results.push(`   गम् → derive → ${h}`);
+		if (h !== 'गच्छति') problems.push(`[tool-dhatupatha] derive link gave ${h}`);
+	}, { dark });
+}
+await run('dark-dhatus-lesson', { width: 1280, height: 800 }, async (page) => {
+	await page.goto(`${BASE}/learn/dhatus/#markers`);
+	await page.waitForLoadState('networkidle');
+	await page.waitForTimeout(400);
+	await page.getByRole('button', { name: 'Decode' }).first().click();
+	await shot(page, 'dark-dhatus-markers');
+	await page.goto(`${BASE}/learn/dhatus/#ganas`);
+	await page.reload();
+	await page.waitForLoadState('networkidle');
+	await page.waitForTimeout(400);
+	await page.locator('.scene button.row').nth(6).click();
+	await shot(page, 'dark-dhatus-ganas');
+}, { dark: true });
+// --- /dhātus ---
+
 await run('dark-sutra', { width: 1280, height: 800 }, async (page) => {
 	await page.goto(`${BASE}/sutra/1.1.1/`);
 	await page.waitForLoadState('networkidle');
 	await shot(page, 'dark-sutra');
 }, { dark: true });
+
+// --- tables & pratyāhāra tooltips (dark) ---
+await run('dark-tables', { width: 1280, height: 800 }, async (page) => {
+	for (const n of ['4.1.2', '3.4.78', '6.1.77']) {
+		await page.goto(`${BASE}/sutra/${n}/`);
+		await page.waitForLoadState('networkidle');
+		await page.locator('figure.implied').scrollIntoViewIfNeeded();
+		await shot(page, `dark-table-${n}`);
+	}
+}, { dark: true });
+// --- end tables & pratyāhāra tooltips (dark) ---
 
 await run('iast-toggle', { width: 1280, height: 800 }, async (page) => {
 	await page.goto(`${BASE}/sutra/8.2.1/`);
@@ -348,6 +540,100 @@ await run('iast-toggle', { width: 1280, height: 800 }, async (page) => {
 	await page.locator('.sutra-iast').waitFor();
 	await shot(page, 'iast-sutra');
 });
+
+// --- engine ---
+for (const [label, viewport, opts] of [['desktop', { width: 1280, height: 800 }, {}], ['mobile', { width: 390, height: 800 }, {}], ['dark', { width: 1280, height: 800 }, { dark: true }], ['reduced', { width: 1280, height: 800 }, { reduced: true }]]) {
+	await run(`engine-${label}`, viewport, async (page) => {
+		await page.goto(`${BASE}/engine/`);
+		await page.getByRole('heading', { level: 1 }).waitFor();
+		await page.waitForLoadState('networkidle');
+		await shot(page, `engine-${label}`);
+		// run an example: pick पाचकः (two chained runs) and step through
+		await page.locator('#run').scrollIntoViewIfNeeded();
+		await page.locator('.ex', { hasText: 'पाचकः' }).click();
+		await page.getByRole('button', { name: /^Pause$/ }).click().catch(() => {});
+		// the 3D canvas (or its 2D fallback) renders
+		await page.locator('.factory[data-mode="3d"] canvas, .factory-fallback').first().waitFor({ timeout: 15000 });
+		const mode = await page.locator('.factory').getAttribute('data-mode');
+		results.push(`   engine factory mode: ${mode}`);
+		await page.getByRole('button', { name: 'First step' }).click();
+		for (let i = 0; i < 12; i++) await page.getByRole('button', { name: 'Next step' }).click();
+		const count = (await page.locator('.controls .count').textContent())?.trim();
+		if (count !== 'step 13 / 27') problems.push(`[engine-${label}] step counter after 12 clicks: ${count}`);
+		const handoffs = await page.locator('.steps li.handoff').count();
+		if (handoffs !== 1) problems.push(`[engine-${label}] expected one handoff row, got ${handoffs}`);
+		await page.waitForTimeout(900);
+		await page.locator('.factory').scrollIntoViewIfNeeded();
+		await shot(page, `engine-run-${label}`);
+		if (mode === '3d') {
+			const label3d = (await page.locator('.f-token .f-code').textContent())?.trim();
+			results.push(`   engine 3D token at ${label3d}`);
+		}
+		await page.locator('.chart').scrollIntoViewIfNeeded();
+		await page.locator('.hop circle').nth(5).hover().catch(() => {});
+		await shot(page, `engine-hop-${label}`);
+		// the map: zoom (wheel after engaging, or buttons on mobile) and pan (drag), then click a cell
+		const map = page.locator('.map');
+		await map.scrollIntoViewIfNeeded();
+		await map.locator('svg rect').nth(100).waitFor();
+		const cells = await map.locator('.cells rect').count();
+		if (cells !== 3983) problems.push(`[engine-${label}] map has ${cells} cells`);
+		await shot(page, `engine-map-${label}`);
+		const box = await map.boundingBox();
+		const cx = box.x + box.width / 2, cy = box.y + box.height / 2;
+		if (label === 'mobile') {
+			for (let i = 0; i < 4; i++) await page.getByRole('button', { name: 'Zoom in' }).click();
+		} else {
+			await page.mouse.move(box.x + 8, box.y + box.height - 8);
+			await page.mouse.down();
+			await page.mouse.up(); // engage the map with a click on empty space (bottom-left corner)
+			await page.mouse.move(cx, cy);
+			for (let i = 0; i < 6; i++) { await page.mouse.wheel(0, -240); await page.waitForTimeout(40); }
+		}
+		const g0 = await map.locator('svg > g').getAttribute('transform');
+		await page.mouse.move(cx, cy);
+		await page.mouse.down();
+		await page.mouse.move(cx - 120, cy - 60, { steps: 6 });
+		await page.mouse.up();
+		const g1 = await map.locator('svg > g').getAttribute('transform');
+		if (g0 === g1) problems.push(`[engine-${label}] drag did not pan the map`);
+		await page.waitForTimeout(300);
+		await shot(page, `engine-map-zoomed-${label}`);
+		// hover then click a cell: find one near the middle of the map view
+		const t2 = await page.evaluate(() => {
+			const r = document.querySelector('.map').getBoundingClientRect();
+			for (let y = r.y + r.height * 0.3; y < Math.min(r.bottom, innerHeight) - 4; y += 6) for (let x = r.x + r.width * 0.3; x < r.right - 4; x += 6) {
+				const el = document.elementFromPoint(x, y);
+				if (el && el.closest('.cells') && el.tagName.toLowerCase() === 'rect') { const b = el.getBoundingClientRect(); return { x: b.x, y: b.y, width: b.width, height: b.height }; }
+			}
+			return null;
+		});
+		if (!t2) throw new Error('no map cell under the view centre');
+		await page.mouse.move(t2.x + t2.width / 2, t2.y + t2.height / 2);
+		await page.waitForTimeout(150);
+		if (label !== 'mobile') {
+			await page.locator('.map .tip').waitFor();
+			await page.waitForTimeout(400);
+			await shot(page, `engine-map-tip-${label}`);
+		}
+		await page.mouse.click(t2.x + t2.width / 2, t2.y + t2.height / 2);
+		// touch devices get a card with an "Open" link first; a mouse click navigates directly
+		await page.waitForURL(/\/sutra\//, { timeout: 3000 }).catch(() => page.locator('.map .tip a.open').click());
+		await page.waitForURL(/\/sutra\/\d\.\d\.\d+\//);
+		results.push(`   engine map cell → ${new URL(page.url()).pathname}`);
+	}, opts);
+}
+await run('engine-adhyaya-link', { width: 1280, height: 800 }, async (page) => {
+	await page.goto(`${BASE}/adhyaya/6/`);
+	await page.locator('.summary').waitFor();
+	await shot(page, 'adhyaya-summary');
+	await page.getByRole('link', { name: /structure map/ }).click();
+	await page.waitForURL(/engine\/#map-a6/);
+	await page.locator('.map .cells rect').nth(10).waitFor();
+	await page.waitForTimeout(500);
+	await shot(page, 'engine-map-from-adhyaya');
+});
+// --- /engine ---
 
 await browser.close();
 stopServer();

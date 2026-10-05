@@ -56,6 +56,17 @@
 	--t-P: #0d7480;
 	--t-AD: #59606d;
 	--t-AT: #8636be;
+	/* it-letters (anubandhas) */
+	--it: #c2185b;
+	--it-soft: #fbe4ee;
+	/* pipeline bands (see src/lib/structure.ts) */
+	--b-defs: #b4561d;
+	--b-case: #a23b84;
+	--b-verbal: #2b67b8;
+	--b-nominal: #17806a;
+	--b-stem: #6a47c2;
+	--b-pada: #8a7420;
+	--b-tri: #c0334a;
 
 	color-scheme: light;
 }
@@ -91,6 +102,15 @@
 		--t-P: #5cc6cf;
 		--t-AD: #a7adb9;
 		--t-AT: #cb9cff;
+		--it: #ff8cc0;
+		--it-soft: #3d1a2a;
+		--b-defs: #f29a5e;
+		--b-case: #e586c9;
+		--b-verbal: #79aef5;
+		--b-nominal: #5fd0b2;
+		--b-stem: #ad94ff;
+		--b-pada: #d9c062;
+		--b-tri: #ff8296;
 		--shadow: 0 1px 2px rgb(0 0 0 / 0.3), 0 4px 16px rgb(0 0 0 / 0.25);
 		--shadow-lg: 0 8px 40px rgb(0 0 0 / 0.5);
 		color-scheme: dark;
@@ -126,6 +146,15 @@
 	--t-P: #5cc6cf;
 	--t-AD: #a7adb9;
 	--t-AT: #cb9cff;
+	--it: #ff8cc0;
+	--it-soft: #3d1a2a;
+	--b-defs: #f29a5e;
+	--b-case: #e586c9;
+	--b-verbal: #79aef5;
+	--b-nominal: #5fd0b2;
+	--b-stem: #ad94ff;
+	--b-pada: #d9c062;
+	--b-tri: #ff8296;
 	--shadow: 0 1px 2px rgb(0 0 0 / 0.3), 0 4px 16px rgb(0 0 0 / 0.25);
 	--shadow-lg: 0 8px 40px rgb(0 0 0 / 0.5);
 	color-scheme: dark;

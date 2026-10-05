@@ -13,6 +13,8 @@
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
 		"test:smoke": "node tests/smoke.mjs",
+		"check:its": "node scripts/check-its.ts",
+		"check:tables": "node scripts/check-tables.ts",
 		"narration": "node scripts/narration.ts && ~/.cache/kokoro/venv/bin/python scripts/tts.py"
 	},
 	"devDependencies": {
@@ -20,6 +22,7 @@
 		"@sveltejs/kit": "^3.0.0",
 		"@sveltejs/vite-plugin-svelte": "^7.2.0",
 		"@types/node": "^22.20.5",
+		"@types/three": "^0.186.0",
 		"playwright-core": "^1.63.0",
 		"svelte": "^5.57.1",
 		"svelte-check": "^4.6.0",
@@ -34,6 +37,7 @@
 		"@fontsource-variable/inter": "^5.3.0",
 		"@fontsource-variable/source-serif-4": "^5.3.0",
 		"@fontsource/noto-serif-devanagari": "^5.3.0",
-		"minisearch": "^7.2.0"
+		"minisearch": "^7.2.0",
+		"three": "^0.186.1"
 	}
 }

@@ -2,15 +2,35 @@
 	import { fly } from 'svelte/transition';
 	import { sutraHref } from '#lib/links.ts';
 	import { settings } from '#lib/settings.svelte.ts';
-	import type { Pada, SutraStub, WordRef } from '#lib/types.ts';
+	import type { Pada, SutraStub, Term, WordRef } from '#lib/types.ts';
+	import TermPopover from './TermPopover.svelte';
 
-	let { pc, an, ad, ss, ssIast, refs }: { pc: Pada[]; an: WordRef[]; ad: WordRef[]; ss: string; ssIast: string; refs: Record<string, SutraStub> } = $props();
+	let { pc, an, ad, ss, ssIast, refs, terms = {} }: { pc: Pada[]; an: WordRef[]; ad: WordRef[]; ss: string; ssIast: string; refs: Record<string, SutraStub>; terms?: Record<string, Term> } = $props();
 
 	let expanded = $state(false);
 	// Show only the innermost headings; the full chain is in the context panel.
 	const headings = $derived(ad.slice(-2));
 	const hasMore = $derived(an.length > 0 || headings.length > 0);
 </script>
+
+<!-- An inherited word links to its source sūtra. One that names a term or pratyāhāra opens the term's card instead,
+     and the source becomes the small link underneath. -->
+{#snippet inherited(x: WordRef, i: number, cls: string, mark: string, what: string)}
+	{@const src = refs[x.id]}
+	{#if x.term && terms[x.term]}
+		<span class="w {cls}" in:fly={{ y: -18, duration: 380, delay: 70 * i }}>
+			<span class="deva"><TermPopover term={terms[x.term]} {refs}>{x.w}</TermPopover></span>
+			{#if settings.iast}<i>{x.iast}</i>{/if}
+			<a class="src" href={sutraHref(src?.n ?? '')} title="{what} from {src?.n}: {src?.s}">{mark} {src?.n}</a>
+		</span>
+	{:else}
+		<a class="w {cls}" href={sutraHref(src?.n ?? '')} in:fly={{ y: -18, duration: 380, delay: 70 * i }} title="{what} from {src?.n}: {src?.s}">
+			<span class="deva">{x.w}</span>
+			{#if settings.iast}<i>{x.iast}</i>{/if}
+			<span class="src">{mark} {src?.n}</span>
+		</a>
+	{/if}
+{/snippet}
 
 <section class="anuvritti" aria-labelledby="anu-h">
 	<div class="head">
@@ -25,24 +45,18 @@
 	<div class="line" aria-live="polite">
 		{#each pc as p, i (i)}
 			<span class="w own" style="--c: var(--r-{p.role})">
-				<span class="deva">{p.w}</span>
+				<span class="deva">
+					{#each p.parts as part, j (j)}{#if j > 0}-<wbr />{/if}{#if part.term && terms[part.term]}<TermPopover term={terms[part.term]} {refs}>{part.w}</TermPopover>{:else}{part.w}{/if}{/each}
+				</span>
 				{#if settings.iast}<i>{p.iast}</i>{/if}
 			</span>
 		{/each}
 		{#if expanded}
-			{#each an as x, i (x.id + x.w)}
-				<a class="w inherited" href={sutraHref(refs[x.id]?.n ?? '')} in:fly={{ y: -18, duration: 380, delay: 70 * i }} title="Carried down (anuvṛtti) from {refs[x.id]?.n}: {refs[x.id]?.s}">
-					<span class="deva">{x.w}</span>
-					{#if settings.iast}<i>{x.iast}</i>{/if}
-					<span class="src">↓ {refs[x.id]?.n}</span>
-				</a>
+			{#each an as x, i (i)}
+				{@render inherited(x, i, 'inherited', '↓', 'Carried down (anuvṛtti)')}
 			{/each}
-			{#each headings as x, i (x.id + x.w)}
-				<a class="w heading" href={sutraHref(refs[x.id]?.n ?? '')} in:fly={{ y: -18, duration: 380, delay: 70 * (an.length + i) }} title="Heading (adhikāra) from {refs[x.id]?.n}: {refs[x.id]?.s}">
-					<span class="deva">{x.w}</span>
-					{#if settings.iast}<i>{x.iast}</i>{/if}
-					<span class="src">⌂ {refs[x.id]?.n}</span>
-				</a>
+			{#each headings as x, i (i)}
+				{@render inherited(x, an.length + i, 'heading', '⌂', 'Heading (adhikāra)')}
 			{/each}
 		{/if}
 	</div>
@@ -121,8 +135,15 @@
 		color: var(--muted);
 		line-height: 1.2;
 	}
-	.inherited:hover,
-	.heading:hover {
+	a.src {
+		text-decoration: none;
+	}
+	a.src:hover {
+		color: var(--indigo);
+		text-decoration: underline;
+	}
+	a.inherited:hover,
+	a.heading:hover {
 		filter: brightness(0.97);
 		text-decoration: underline;
 	}

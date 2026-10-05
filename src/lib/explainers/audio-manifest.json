@@ -39,6 +39,17 @@
 		"ladder": "audio/conflict/ladder.7342f4cd.mp3",
 		"quiz": "audio/conflict/quiz.34cc5c34.mp3"
 	},
+	"dhatus": {
+		"inputs": "audio/dhatus/inputs.7c48b048.mp3",
+		"ganas": "audio/dhatus/ganas.4c28c1dc.mp3",
+		"what-is": "audio/dhatus/what-is.a1de1331.mp3",
+		"markers": "audio/dhatus/markers.72a4b6a1.mp3",
+		"krdanta": "audio/dhatus/krdanta.d2488218.mp3",
+		"ganapatha": "audio/dhatus/ganapatha.f8a49a9b.mp3",
+		"unadi": "audio/dhatus/unadi.fc5baff9.mp3",
+		"claims": "audio/dhatus/claims.6529434d.mp3",
+		"quiz": "audio/dhatus/quiz.5c84b069.mp3"
+	},
 	"grammars": {
 		"bnf": "audio/grammars/bnf.97a89eef.mp3",
 		"ingerman": "audio/grammars/ingerman.f4734880.mp3",
@@ -49,7 +60,8 @@
 	},
 	"it-markers": {
 		"tags": "audio/it-markers/tags.50fbcd07.mp3",
-		"detect": "audio/it-markers/detect.7754b0a8.mp3",
+		"detect": "audio/it-markers/detect.57cd67a5.mp3",
+		"flow": "audio/it-markers/flow.bd6a19af.mp3",
 		"strip": "audio/it-markers/strip.051e4ddb.mp3",
 		"effects": "audio/it-markers/effects.c17edb37.mp3",
 		"flags": "audio/it-markers/flags.244c03f0.mp3",
