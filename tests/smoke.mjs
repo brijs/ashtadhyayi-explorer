@@ -116,6 +116,61 @@ for (const [label, viewport] of [['desktop', { width: 1280, height: 800 }], ['mo
 		await page.waitForURL(/sutra\/6\.1\.102\//);
 	});
 
+	// --- tables & pratyāhāra tooltips ---
+	await run(`tables-${label}`, viewport, async (page) => {
+		for (const [n, cells] of [['4.1.2', 21], ['3.4.78', 18]]) {
+			await page.goto(`${BASE}/sutra/${n}/`);
+			await page.waitForLoadState('networkidle');
+			await page.waitForTimeout(400);
+			// shown as a table by default; toggling hides and restores it
+			await page.locator('figure.implied').waitFor();
+			const got = await page.locator('figure.implied td .item').count();
+			if (got !== cells) problems.push(`[tables-${label}] ${n}: ${got} cells, expected ${cells}`);
+			await page.getByRole('button', { name: 'As written' }).click();
+			await page.locator('figure.implied').waitFor({ state: 'detached' });
+			await page.getByRole('button', { name: 'As a table' }).click();
+			await page.locator('figure.implied').scrollIntoViewIfNeeded();
+			await shot(page, `table-${n}-${label}`);
+		}
+		// an it-letter in a cell opens its card (जस्: ज् by 1.3.7)
+		await page.goto(`${BASE}/sutra/4.1.2/`);
+		await page.waitForLoadState('networkidle');
+		await page.waitForTimeout(400);
+		await page.locator('figure.implied .it-trigger').nth(2).click();
+		await page.locator('.pop').waitFor();
+		await page.keyboard.press('Escape');
+		// pratyāhāra card on 6.1.77: letters and Śiva-sūtra span
+		await page.goto(`${BASE}/sutra/6.1.77/`);
+		await page.waitForLoadState('networkidle');
+		await page.waitForTimeout(400);
+		await page.locator('.chip .pr-trigger').first().hover();
+		await page.locator('.pop .letters').waitFor();
+		const span = (await page.locator('.pop .span').textContent())?.replace(/\s+/g, ' ');
+		if (!span?.includes('ऋऌक्')) problems.push(`[tables-${label}] इक् card span: ${span}`);
+		await page.waitForTimeout(200);
+		await shot(page, `pratyahara-card-${label}`);
+		await page.mouse.move(0, 0);
+		await page.locator('figure.implied').scrollIntoViewIfNeeded();
+		await shot(page, `table-6.1.77-${label}`);
+		// an inherited pratyāhāra (अचि from 6.1.77 in 6.1.78) opens the same card
+		await page.goto(`${BASE}/sutra/6.1.78/`);
+		await page.waitForLoadState('networkidle');
+		await page.waitForTimeout(400);
+		await page.getByRole('button', { name: /Fill in inherited words/ }).click();
+		await page.locator('.w.inherited .pr-trigger').first().waitFor();
+		await page.waitForTimeout(600);
+		await page.locator('.w.inherited .pr-trigger').first().click();
+		await page.locator('.pop .letters').waitFor();
+		await shot(page, `inherited-pratyahara-${label}`);
+		await page.keyboard.press('Escape');
+		// a definition links to the table it sets up
+		await page.goto(`${BASE}/sutra/1.4.101/`);
+		await page.waitForLoadState('networkidle');
+		await page.locator('.table-links a').first().click();
+		await page.waitForURL(/sutra\/3\.4\.78\//);
+	});
+	// --- end tables & pratyāhāra tooltips ---
+
 	await run(`adhyaya-${label}`, viewport, async (page) => {
 		await page.goto(`${BASE}/adhyaya/1/`);
 		await page.getByRole('button', { name: 'Definitions' }).click();
@@ -404,6 +459,17 @@ await run('dark-sutra', { width: 1280, height: 800 }, async (page) => {
 	await page.waitForLoadState('networkidle');
 	await shot(page, 'dark-sutra');
 }, { dark: true });
+
+// --- tables & pratyāhāra tooltips (dark) ---
+await run('dark-tables', { width: 1280, height: 800 }, async (page) => {
+	for (const n of ['4.1.2', '3.4.78', '6.1.77']) {
+		await page.goto(`${BASE}/sutra/${n}/`);
+		await page.waitForLoadState('networkidle');
+		await page.locator('figure.implied').scrollIntoViewIfNeeded();
+		await shot(page, `dark-table-${n}`);
+	}
+}, { dark: true });
+// --- end tables & pratyāhāra tooltips (dark) ---
 
 await run('iast-toggle', { width: 1280, height: 800 }, async (page) => {
 	await page.goto(`${BASE}/sutra/8.2.1/`);

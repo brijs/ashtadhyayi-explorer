@@ -14,6 +14,7 @@
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
 		"test:smoke": "node tests/smoke.mjs",
 		"check:its": "node scripts/check-its.ts",
+		"check:tables": "node scripts/check-tables.ts",
 		"narration": "node scripts/narration.ts && ~/.cache/kokoro/venv/bin/python scripts/tts.py"
 	},
 	"devDependencies": {

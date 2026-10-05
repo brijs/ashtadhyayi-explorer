@@ -9,7 +9,8 @@ export type Role =
  * `end` the case ending that `w` adds to it. */
 export type PadaPart = { w: string; term?: string; it?: ItContext; u?: string; end?: string };
 export type Pada = { w: string; iast: string; kind: 'S' | 'T'; vib: string; vac: string; role: Role; parts: PadaPart[] };
-export type WordRef = { w: string; iast: string; id: string };
+/** A word carried in from another sūtra; `term` is the saṃjñā or pratyāhāra it names, as tagged in that sūtra. */
+export type WordRef = { w: string; iast: string; id: string; term?: string };
 export type SutraType = { code: 'V' | 'S' | 'P' | 'AD' | 'AT'; label: string };
 
 export type Prayoga = { word: string; text: string; loc: string; url: string; pada: string; ref: string };

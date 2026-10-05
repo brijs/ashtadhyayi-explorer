@@ -14,25 +14,40 @@
 
 <script lang="ts">
 	import { settings } from '#lib/settings.svelte.ts';
+	import type { SutraStub, Term } from '#lib/types.ts';
+	import TermPopover from './TermPopover.svelte';
 
-	let { pc }: { pc: Pada[] } = $props();
+	// With `terms`, technical terms and pratyāhāras in the slots open their hover card, as in the word-by-word chips.
+	let { pc, terms = {}, refs = {} }: { pc: Pada[]; terms?: Record<string, Term>; refs?: Record<string, SutraStub> } = $props();
 	const f = $derived(formulaParts(pc));
-	const words = (ps: Pada[]) => ps.map((p) => p.w).join(' ');
 	const iasts = (ps: Pada[]) => ps.map((p) => p.iast).join(' ');
 </script>
+
+{#snippet words(ps: Pada[])}
+	<span class="deva">
+		{#each ps as p, pi (pi)}
+			{#if pi > 0}{' '}{/if}
+			{#each p.parts as part, i (i)}
+				{#if i > 0}-<wbr />{/if}
+				{#if part.term && terms[part.term]}<TermPopover term={terms[part.term]} {refs}>{part.w}</TermPopover>{:else}{part.w}{/if}
+			{/each}
+		{/each}
+	</span>
+{/snippet}
 
 {#if f}
 	<figure class="formula">
 		<figcaption class="eyebrow">As a rewrite rule <span class="muted">(sketch from case endings)</span></figcaption>
-		<div class="row" role="img" aria-label="Replace {iasts(f.target)} with {iasts(f.subject)}{f.left.length ? ` after ${iasts(f.left)}` : ''}{f.right.length ? ` before ${iasts(f.right)}` : ''}">
-			<span class="tok" style="--c: var(--r-target)"><span class="deva">{words(f.target)}</span>{#if settings.iast}<i>{iasts(f.target)}</i>{/if}</span>
+		<!-- the sentence below reads the same rule out in words -->
+		<div class="row">
+			<span class="tok" style="--c: var(--r-target)">{@render words(f.target)}{#if settings.iast}<i>{iasts(f.target)}</i>{/if}</span>
 			<span class="op">→</span>
-			<span class="tok" style="--c: var(--r-subject)"><span class="deva">{words(f.subject)}</span>{#if settings.iast}<i>{iasts(f.subject)}</i>{/if}</span>
+			<span class="tok" style="--c: var(--r-subject)">{@render words(f.subject)}{#if settings.iast}<i>{iasts(f.subject)}</i>{/if}</span>
 			{#if f.left.length || f.right.length}
 				<span class="op">/</span>
-				{#if f.left.length}<span class="tok" style="--c: var(--r-left)"><span class="deva">{words(f.left)}</span>{#if settings.iast}<i>{iasts(f.left)}</i>{/if}</span>{/if}
+				{#if f.left.length}<span class="tok" style="--c: var(--r-left)">{@render words(f.left)}{#if settings.iast}<i>{iasts(f.left)}</i>{/if}</span>{/if}
 				<span class="slot" aria-hidden="true">＿</span>
-				{#if f.right.length}<span class="tok" style="--c: var(--r-right)"><span class="deva">{words(f.right)}</span>{#if settings.iast}<i>{iasts(f.right)}</i>{/if}</span>{/if}
+				{#if f.right.length}<span class="tok" style="--c: var(--r-right)">{@render words(f.right)}{#if settings.iast}<i>{iasts(f.right)}</i>{/if}</span>{/if}
 			{/if}
 			{#if f.optional}<span class="opt">optional</span>{/if}
 		</div>
