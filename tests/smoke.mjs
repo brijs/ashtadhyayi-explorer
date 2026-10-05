@@ -541,6 +541,100 @@ await run('iast-toggle', { width: 1280, height: 800 }, async (page) => {
 	await shot(page, 'iast-sutra');
 });
 
+// --- engine ---
+for (const [label, viewport, opts] of [['desktop', { width: 1280, height: 800 }, {}], ['mobile', { width: 390, height: 800 }, {}], ['dark', { width: 1280, height: 800 }, { dark: true }], ['reduced', { width: 1280, height: 800 }, { reduced: true }]]) {
+	await run(`engine-${label}`, viewport, async (page) => {
+		await page.goto(`${BASE}/engine/`);
+		await page.getByRole('heading', { level: 1 }).waitFor();
+		await page.waitForLoadState('networkidle');
+		await shot(page, `engine-${label}`);
+		// run an example: pick पाचकः (two chained runs) and step through
+		await page.locator('#run').scrollIntoViewIfNeeded();
+		await page.locator('.ex', { hasText: 'पाचकः' }).click();
+		await page.getByRole('button', { name: /^Pause$/ }).click().catch(() => {});
+		// the 3D canvas (or its 2D fallback) renders
+		await page.locator('.factory[data-mode="3d"] canvas, .factory-fallback').first().waitFor({ timeout: 15000 });
+		const mode = await page.locator('.factory').getAttribute('data-mode');
+		results.push(`   engine factory mode: ${mode}`);
+		await page.getByRole('button', { name: 'First step' }).click();
+		for (let i = 0; i < 12; i++) await page.getByRole('button', { name: 'Next step' }).click();
+		const count = (await page.locator('.controls .count').textContent())?.trim();
+		if (count !== 'step 13 / 27') problems.push(`[engine-${label}] step counter after 12 clicks: ${count}`);
+		const handoffs = await page.locator('.steps li.handoff').count();
+		if (handoffs !== 1) problems.push(`[engine-${label}] expected one handoff row, got ${handoffs}`);
+		await page.waitForTimeout(900);
+		await page.locator('.factory').scrollIntoViewIfNeeded();
+		await shot(page, `engine-run-${label}`);
+		if (mode === '3d') {
+			const label3d = (await page.locator('.f-token .f-code').textContent())?.trim();
+			results.push(`   engine 3D token at ${label3d}`);
+		}
+		await page.locator('.chart').scrollIntoViewIfNeeded();
+		await page.locator('.hop circle').nth(5).hover().catch(() => {});
+		await shot(page, `engine-hop-${label}`);
+		// the map: zoom (wheel after engaging, or buttons on mobile) and pan (drag), then click a cell
+		const map = page.locator('.map');
+		await map.scrollIntoViewIfNeeded();
+		await map.locator('svg rect').nth(100).waitFor();
+		const cells = await map.locator('.cells rect').count();
+		if (cells !== 3983) problems.push(`[engine-${label}] map has ${cells} cells`);
+		await shot(page, `engine-map-${label}`);
+		const box = await map.boundingBox();
+		const cx = box.x + box.width / 2, cy = box.y + box.height / 2;
+		if (label === 'mobile') {
+			for (let i = 0; i < 4; i++) await page.getByRole('button', { name: 'Zoom in' }).click();
+		} else {
+			await page.mouse.move(box.x + 8, box.y + box.height - 8);
+			await page.mouse.down();
+			await page.mouse.up(); // engage the map with a click on empty space (bottom-left corner)
+			await page.mouse.move(cx, cy);
+			for (let i = 0; i < 6; i++) { await page.mouse.wheel(0, -240); await page.waitForTimeout(40); }
+		}
+		const g0 = await map.locator('svg > g').getAttribute('transform');
+		await page.mouse.move(cx, cy);
+		await page.mouse.down();
+		await page.mouse.move(cx - 120, cy - 60, { steps: 6 });
+		await page.mouse.up();
+		const g1 = await map.locator('svg > g').getAttribute('transform');
+		if (g0 === g1) problems.push(`[engine-${label}] drag did not pan the map`);
+		await page.waitForTimeout(300);
+		await shot(page, `engine-map-zoomed-${label}`);
+		// hover then click a cell: find one near the middle of the map view
+		const t2 = await page.evaluate(() => {
+			const r = document.querySelector('.map').getBoundingClientRect();
+			for (let y = r.y + r.height * 0.3; y < Math.min(r.bottom, innerHeight) - 4; y += 6) for (let x = r.x + r.width * 0.3; x < r.right - 4; x += 6) {
+				const el = document.elementFromPoint(x, y);
+				if (el && el.closest('.cells') && el.tagName.toLowerCase() === 'rect') { const b = el.getBoundingClientRect(); return { x: b.x, y: b.y, width: b.width, height: b.height }; }
+			}
+			return null;
+		});
+		if (!t2) throw new Error('no map cell under the view centre');
+		await page.mouse.move(t2.x + t2.width / 2, t2.y + t2.height / 2);
+		await page.waitForTimeout(150);
+		if (label !== 'mobile') {
+			await page.locator('.map .tip').waitFor();
+			await page.waitForTimeout(400);
+			await shot(page, `engine-map-tip-${label}`);
+		}
+		await page.mouse.click(t2.x + t2.width / 2, t2.y + t2.height / 2);
+		// touch devices get a card with an "Open" link first; a mouse click navigates directly
+		await page.waitForURL(/\/sutra\//, { timeout: 3000 }).catch(() => page.locator('.map .tip a.open').click());
+		await page.waitForURL(/\/sutra\/\d\.\d\.\d+\//);
+		results.push(`   engine map cell → ${new URL(page.url()).pathname}`);
+	}, opts);
+}
+await run('engine-adhyaya-link', { width: 1280, height: 800 }, async (page) => {
+	await page.goto(`${BASE}/adhyaya/6/`);
+	await page.locator('.summary').waitFor();
+	await shot(page, 'adhyaya-summary');
+	await page.getByRole('link', { name: /structure map/ }).click();
+	await page.waitForURL(/engine\/#map-a6/);
+	await page.locator('.map .cells rect').nth(10).waitFor();
+	await page.waitForTimeout(500);
+	await shot(page, 'engine-map-from-adhyaya');
+});
+// --- /engine ---
+
 await browser.close();
 stopServer();
 console.log(results.join('\n'));

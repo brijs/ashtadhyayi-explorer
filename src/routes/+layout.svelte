@@ -16,6 +16,7 @@
 
 	const nav = [
 		{ href: resolve('/adhyaya/[a]', { a: '1' }) + '/', label: 'Sūtras', match: ['/adhyaya', '/sutra'] },
+		{ href: resolve('/engine') + '/', label: 'Structure', match: ['/engine'] },
 		{ href: resolve('/learn') + '/', label: 'Learn', match: ['/learn'] },
 		{ href: resolve('/tools') + '/', label: 'Tools', match: ['/tools'] },
 		{ href: resolve('/cs') + '/', label: 'Pāṇini & CS', match: ['/cs'] },

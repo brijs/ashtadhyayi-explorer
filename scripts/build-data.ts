@@ -409,9 +409,30 @@ const dhatus = tsv('dhatupatha')
 // Sample derivations → for each sūtra, a few live examples that use it (linked from sūtra pages).
 type Example = { w: string; h: string; d: string; steps: number };
 const examples = new Map<string, Example[]>();
-const record = (ps: { text: string; history: { rule: { source: string; code: string } }[] }[], h: string, d: string) => {
+// Usage over the same sample: per sūtra id, [derivations that use it, steps where it fires, of those steps, how many change the string].
+const usage: Record<string, [number, number, number]> = {};
+let usageDerivations = 0;
+type SampleStep = { rule: { source: string; code: string }; result: { text: string }[] };
+const record = (ps: { text: string; history: SampleStep[] }[], h: string, d: string) => {
 	const p = ps[0];
 	if (!p) return 0;
+	usageDerivations++;
+	let prev = '';
+	const seen = new Set<string>();
+	for (const st of p.history) {
+		const text = st.result.map((t) => t.text).join('+');
+		if (st.rule.source === 'ashtadhyayi') {
+			const id = idFromApn(st.rule.code);
+			if (byId.has(id)) {
+				const u = (usage[id] ??= [0, 0, 0]);
+				if (!seen.has(id)) u[0]++;
+				seen.add(id);
+				u[1]++;
+				if (text !== prev) u[2]++;
+			}
+		}
+		prev = text;
+	}
 	const ex = { w: slp1ToDeva(p.text), h, d, steps: p.history.length };
 	for (const code of new Set(p.history.filter((st) => st.rule.source === 'ashtadhyayi').map((st) => st.rule.code))) {
 		const id = idFromApn(code);
@@ -593,6 +614,7 @@ w(OUT_STATIC, 'shivasutra.json', shiva);
 w(OUT_STATIC, 'adhikaras.json', adhikaras);
 w(OUT_STATIC, 'meta.json', { sha: readFileSync(join(RAW, '.sha'), 'utf8').trim(), count: raw.length, typeCounts, builtAt: new Date().toISOString().slice(0, 10) });
 w(OUT_GEN, 'sutras.full.json', full);
+w(OUT_GEN, 'usage.json', { derivations: usageDerivations, usage });
 w(OUT_STATIC, 'dhatus.json', dhatus);
 w(OUT_STATIC, 'vidyut-rules.json', ruleTexts);
 
