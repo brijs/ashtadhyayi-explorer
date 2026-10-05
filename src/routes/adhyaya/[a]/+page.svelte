@@ -3,6 +3,9 @@
 	import { sutraHref, adhyayaHref } from '#lib/links.ts';
 	import { devaToIast } from '#lib/translit.ts';
 	import TypeBadge from '#lib/components/TypeBadge.svelte';
+	import SutraRef from '#lib/components/SutraRef.svelte';
+	import { resolve } from '$app/paths';
+	import { BANDS } from '#lib/structure.ts';
 	import type { SutraType } from '#lib/types.ts';
 	import type { PageProps } from './$types';
 
@@ -36,7 +39,22 @@
 
 	<header class="head">
 		<p class="eyebrow">Adhyāya {data.a} of 8 · {total} sūtras</p>
-		<h1><span class="deva">{SA_NUM[data.a]} अध्यायः</span></h1>
+		<h1><span class="deva">{SA_NUM[data.a]} अध्यायः</span> <span class="ttl">{data.summary.title}</span></h1>
+		<div class="summary card" style="--c: var(--b-{data.summary.band})">
+			<p class="role"><span class="band">{BANDS[data.summary.band].label}</span> · {data.summary.summary}</p>
+			{#if data.summary.headingSpans.some((h) => h.toN)}
+				<p class="heads">
+					Headings:
+					{#each data.summary.headingSpans.filter((h) => h.toN) as h, i (h.n)}{#if i}; {/if}<SutraRef n={h.n} s={h.s} /> <span class="muted">→ {h.toN}</span>{/each}
+				</p>
+			{/if}
+			<ol class="psum">
+				{#each data.summary.padas as p (p.p)}
+					<li style="--pc: var(--b-{p.band})"><a href="#pada-{p.p}"><b>{data.a}.{p.p}</b> {p.title}</a></li>
+				{/each}
+			</ol>
+			<a class="maplink" href="{resolve('/engine')}/#map-a{data.a}">See adhyāya {data.a} on the structure map →</a>
+		</div>
 		<div class="filters" role="group" aria-label="Filter by sūtra type">
 			{#each FILTERS as f (f.id)}
 				<button class="btn" aria-pressed={filter === f.id} onclick={() => (filter = f.id)}>{f.label}</button>
@@ -52,7 +70,8 @@
 
 	{#each data.padas as p (p.p)}
 		<section id="pada-{p.p}" class="pada">
-			<h2>Pāda {data.a}.{p.p}</h2>
+			<h2>Pāda {data.a}.{p.p} <span class="ptitle">{data.summary.padas[p.p - 1].title}</span></h2>
+			<p class="psummary">{data.summary.padas[p.p - 1].summary} <a href="{resolve('/engine')}/#map-a{data.a}-{p.p}" class="muted">map →</a></p>
 			<ol class="list">
 				{#each p.sutras as s (s.id)}
 					{#if show(s.ty)}
@@ -111,6 +130,65 @@
 	}
 	.head h1 .deva {
 		font-weight: 600;
+	}
+	.ttl {
+		display: block;
+		font-size: 0.5em;
+		color: var(--ink-2);
+		margin-top: 2px;
+	}
+	.summary {
+		padding: 12px 16px;
+		margin: 0 0 16px;
+		border-left: 4px solid var(--c);
+		font-size: 14.5px;
+		box-shadow: none;
+	}
+	.summary p {
+		margin: 0 0 6px;
+		color: var(--ink-2);
+	}
+	.band {
+		color: var(--c);
+		font-weight: 600;
+	}
+	.heads {
+		font-size: 13.5px;
+	}
+	.psum {
+		list-style: none;
+		margin: 6px 0 8px;
+		padding: 0;
+		display: grid;
+		grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+		gap: 4px 14px;
+		font-size: 13.5px;
+	}
+	.psum a {
+		text-decoration: none;
+		color: var(--ink-2);
+	}
+	.psum b {
+		font-family: var(--font-mono);
+		font-size: 12px;
+		color: var(--pc);
+		margin-right: 4px;
+	}
+	.maplink {
+		font-size: 13.5px;
+	}
+	.ptitle {
+		font-family: var(--font-ui);
+		font-size: 15px;
+		font-weight: 500;
+		color: var(--ink-2);
+		margin-left: 6px;
+	}
+	.psummary {
+		font-size: 14px;
+		color: var(--ink-2);
+		max-width: 60em;
+		margin: -4px 0 10px;
 	}
 	.filters {
 		display: flex;

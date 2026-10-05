@@ -4,12 +4,14 @@
 	import { settings } from '#lib/settings.svelte.ts';
 	import { sutraHref, adhyayaHref } from '#lib/links.ts';
 	import RuleFormula from '#lib/components/RuleFormula.svelte';
+	import { ADHYAYAS, BANDS } from '#lib/structure.ts';
 	import type { PageProps } from './$types';
 
 	let { data }: PageProps = $props();
 
 	const areas = [
 		{ href: resolve('/adhyaya/[a]', { a: '1' }) + '/', title: 'Sūtra Explorer', sa: 'सूत्रपाठः', body: 'All 3,983 sūtras, word by word: case roles, inherited words, headings, commentaries.' },
+		{ href: resolve('/engine') + '/', title: 'How the engine works', sa: 'संरचना', body: 'Inputs, rules and outputs; how the eight chapters hand off; a 3D assembly line, live derivations and a zoomable map of the text.' },
 		{ href: resolve('/learn') + '/', title: 'Learn', sa: 'शिक्षा', body: 'Animated explainers for the core machinery: Śiva sūtras, how to read a sūtra, anuvṛtti.' },
 		{ href: resolve('/tools') + '/', title: 'Tools', sa: 'उपकरणानि', body: 'A pratyāhāra calculator and a step-by-step derivation debugger.' },
 		{ href: resolve('/cs') + '/', title: 'Pāṇini & Computer Science', sa: 'पाणिनिः गणकशास्त्रं च', body: 'Rewrite rules, metarules, rule ordering, and a toy rule engine you can run.' }
@@ -83,9 +85,13 @@
 
 <section class="wrap chapters">
 	<h2>Browse by adhyāya</h2>
+	<p class="muted">Each chapter has a job in the word-building pipeline. <a href={resolve('/engine') + '/'}>See how they fit together →</a></p>
 	<div class="ch-grid">
-		{#each [1, 2, 3, 4, 5, 6, 7, 8] as a (a)}
-			<a href={adhyayaHref(a)} class="ch">{a}</a>
+		{#each ADHYAYAS as ad (ad.a)}
+			<a href={adhyayaHref(ad.a)} class="ch" style="--c: var(--b-{ad.band})">
+				<span class="chn">{ad.a}</span>
+				<span class="cht">{BANDS[ad.band].short}</span>
+			</a>
 		{/each}
 	</div>
 </section>
@@ -198,7 +204,7 @@
 	}
 	.areas {
 		display: grid;
-		grid-template-columns: repeat(4, minmax(0, 1fr));
+		grid-template-columns: repeat(5, minmax(0, 1fr));
 		gap: 16px;
 		margin-top: 24px;
 	}
@@ -273,9 +279,13 @@
 		margin-top: 14px;
 	}
 	.ch {
-		display: grid;
-		place-items: center;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		gap: 2px;
 		aspect-ratio: 1;
+		border-top: 4px solid var(--c) !important;
 		border-radius: 14px;
 		border: 1px solid var(--line);
 		background: var(--surface);
@@ -289,6 +299,26 @@
 		background: var(--saffron);
 		color: #fff;
 		border-color: var(--saffron);
+	}
+	.chn {
+		line-height: 1;
+	}
+	.cht {
+		font-family: var(--font-ui);
+		font-size: 11px;
+		font-weight: 600;
+		color: var(--c);
+		text-align: center;
+		line-height: 1.2;
+		padding: 0 4px;
+	}
+	.ch:hover .cht {
+		color: #fff;
+	}
+	@media (max-width: 1100px) {
+		.areas {
+			grid-template-columns: repeat(3, minmax(0, 1fr));
+		}
 	}
 	@media (max-width: 900px) {
 		.hero-grid {

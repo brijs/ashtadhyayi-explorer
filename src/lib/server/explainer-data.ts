@@ -29,36 +29,49 @@ export type Derivation = { word: string; hash: string; steps: DStep[] };
 let vidyutP: Promise<any> | null = null;
 const vidyut = () => (vidyutP ??= vidyutNode());
 
-/** Run one vidyut derivation at prerender time and return it with sūtra texts attached. */
-async function derive(
-	spec: { t: [string, string, string?] } | { s: [string, string, string, string, boolean?] } | { k: [string, string] },
-	extra: Partial<{ lakara: string; purusha: string; vacana: string }> = {}
-): Promise<Derivation> {
+export type DeriveSpec =
+	| { t: [string, string, string?] }
+	| { s: [string, string, string, string, boolean?] }
+	| { k: [string, string] }
+	| { tad: [string, string] };
+export type DeriveExtra = Partial<{ lakara: string; purusha: string; vacana: string; sanadi: string[]; prefixes: string[]; want: string }>;
+
+let dhatuList: { c: string; a: string; g: string; ag: string | null }[] | null = null;
+
+/**
+ * Run one vidyut derivation at prerender time and return it with sūtra texts attached.
+ * t = tiṅanta [dhātu code, label, pada?], s = subanta [stem, liṅga, vibhakti, vacana, nyāp?],
+ * k = kṛdanta [dhātu code, kṛt], tad = taddhitānta [stem, taddhita]. `want` (SLP1) picks among optional outputs.
+ */
+export async function derive(spec: DeriveSpec, extra: DeriveExtra = {}): Promise<Derivation> {
 	const v = await vidyut();
 	const { corpus, byApn } = getCorpus();
-	const dhatus: { c: string; a: string; g: string; ag: string | null }[] = JSON.parse(readFileSync(join(process.cwd(), 'static', 'data', 'dhatus.json'), 'utf8'));
+	dhatuList ??= JSON.parse(readFileSync(join(process.cwd(), 'static', 'data', 'dhatus.json'), 'utf8'));
 	const dh = (code: string) => {
-		const d = dhatus.find((x) => x.c === code)!;
-		return { aupadeshika: d.a, gana: d.g, antargana: d.ag, sanadi: [], prefixes: [] };
+		const d = dhatuList!.find((x) => x.c === code)!;
+		return { aupadeshika: d.a, gana: d.g, antargana: d.ag, sanadi: extra.sanadi ?? [], prefixes: extra.prefixes ?? [] };
 	};
 	let ps: any[];
-	let hash: string;
+	let hash = '';
 	if ('t' in spec) {
 		const [code, , pada] = spec.t;
 		const lakara = extra.lakara ?? 'Lat', purusha = extra.purusha ?? 'Prathama', vacana = extra.vacana ?? 'Eka';
 		ps = v.deriveTinantas({ dhatu: dh(code), lakara, prayoga: 'Kartari', purusha, vacana, skip_at_agama: false, pada: pada ?? null });
-		hash = `t=${code},${lakara},Kartari,${purusha},${vacana}${pada ? ',' + pada : ''}`;
+		// the debugger's hash has no slot for sanādi affixes or prefixes
+		if (!extra.sanadi?.length && !extra.prefixes?.length) hash = `t=${code},${lakara},Kartari,${purusha},${vacana}${pada ? ',' + pada : ''}`;
 	} else if ('s' in spec) {
 		const [stem, linga, vibhakti, vacana, nyap] = spec.s;
 		ps = v.deriveSubantas({ pratipadika: nyap ? { nyap: stem } : { basic: stem }, linga, vibhakti, vacana });
 		hash = `s=${stem},${linga},${vibhakti},${vacana}${nyap ? ',nyap' : ''}`;
-	} else {
+	} else if ('k' in spec) {
 		const [code, krt] = spec.k;
 		ps = v.deriveKrdantas({ dhatu: dh(code), krt, unadi: null, lakara: null, prayoga: null, upapada: null });
-		hash = '';
+	} else {
+		const [stem, taddhita] = spec.tad;
+		ps = v.deriveTaddhitantas({ pratipadika: { basic: stem }, taddhita });
 	}
-	const p = ps[0];
-	if (!p) throw new Error(`no derivation for ${JSON.stringify(spec)}`);
+	const p = extra.want ? ps.find((x) => x.text === extra.want) : ps[0];
+	if (!p) throw new Error(`no derivation for ${JSON.stringify(spec)}${extra.want ? ' giving ' + extra.want : ''}: got ${ps.map((x) => x.text).join('/')}`);
 	return {
 		word: slp1ToDeva(p.text),
 		hash,
