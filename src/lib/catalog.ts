@@ -33,6 +33,7 @@ export const CS_LESSONS: Lesson[] = [
 
 export const TOOLS: Lesson[] = [
 	{ slug: 'pratyahara', title: 'Pratyāhāra calculator', sa: 'प्रत्याहारः', blurb: 'Pick a start sound and a marker; see the class light up on the Śiva sūtras.', sutras: ['1.1.71'], status: 'ready' },
+	{ slug: 'anubandha', title: 'It-letter finder', sa: 'अनुबन्धः', blurb: 'Which letters of an affix or root are tags? Rule-by-rule through 1.3.2–1.3.9, with what each tag does.', sutras: ['1.3.2', '1.3.3', '1.3.4', '1.3.5', '1.3.6', '1.3.7', '1.3.8', '1.3.9', '1.1.5', '7.2.115', '7.2.116', '3.4.113', '7.1.1', '7.1.2', '7.1.3', '7.3.50', '3.4.77'], status: 'ready' },
 	{ slug: 'prakriya', title: 'Derivation debugger', sa: 'प्रक्रिया', blurb: 'Step through real word derivations; every step links to the sūtra that fired.', sutras: [], status: 'ready' },
 	{ slug: 'sandhi', title: 'Sandhi playground', sa: 'सन्धिः', blurb: 'Join two words and see which sūtras apply.', sutras: ['6.1.77', '6.1.87', '6.1.101'], status: 'soon' }
 ];
