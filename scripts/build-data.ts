@@ -123,19 +123,94 @@ const pratyaharas = pratyRaw.map((p) => {
 	const listedNorm = listed.map((v) => (v.endsWith('्') ? v.slice(0, -1) : v));
 	const ok = computed !== null && computed.join() === listedNorm.join();
 	const sutraNums = [...p.sutranum.matchAll(/\[\[([\d.]+)\]\]/g)].map((m) => asciiDigits(m[1]));
-	return { name: p.name, iast: devaToIast(p.name), letters: listedNorm, computedMatches: ok, sutras: sutraNums.map(idFromApn).filter((i) => byId.has(i)) };
+	return { name: p.name, iast: devaToIast(p.name), letters: listedNorm, computedMatches: ok, sutras: sutraNums.map(idFromApn).filter((i) => byId.has(i)), affixes: computed === null ? listed : null };
 });
 const pratyMismatch = pratyaharas.filter((p) => !p.computedMatches).map((p) => p.name);
 for (const p of pratyaharas) {
 	if (terms.has(p.name)) continue;
-	terms.set(p.name, { key: p.name, iast: p.iast, kind: 'pratyahara', sutras: p.sutras, letters: p.letters });
+	// classes of affixes (सुप्, तिङ्, कृञ् …) keep their listed forms with the virāma (जस्, not जस)
+	terms.set(p.name, { key: p.name, iast: p.iast, kind: 'pratyahara', sutras: p.sutras, letters: p.affixes ?? p.letters });
 }
+for (const p of pratyaharas) delete (p as { affixes?: unknown }).affixes;
 const termStems = [...terms.keys()]
-	.map((k) => ({ key: k, stem: k.endsWith('्') ? k.slice(0, -1) : k }))
+	.map((k) => ({ key: k, stem: k.endsWith('्') ? k.slice(0, -1) : k, kind: terms.get(k)!.kind }))
 	.sort((a, b) => b.stem.length - a.stem.length);
 
-function matchTerm(part: string): string | undefined {
-	for (const { key, stem } of termStems) {
+// Pratyāhāra names are short and many collide with affixes, roots and ordinary words, so they are matched
+// more strictly than saṃjñās:
+//  1. the ending must be one a consonant-final stem takes (हल् → हलः, हलि, हलोः …), so a-stem forms (हलात्,
+//     अकाभ्याम्, and a nominative singular like इकः = the affix ika in 7.3.50) are not tagged;
+//  2. inside a compound only the bare name counts (अच्-हलौ, or हल-आदेः where sandhi hides the virāma);
+//  3. names that are also affixes, roots or words are tagged only in the sūtras listed in HOMONYM_PRATYAHARAS;
+//  4. in a list of sup/tiṅ affixes (4.1.2, 3.4.101 …) the items are affixes, not sound classes: only the closing
+//     class names सुप्/तिङ् are tagged.
+// Endings of a consonant-final stem (forms in -bhyām/-bhis/-bhyas change the stem and never match).
+const ANY_CONS_ENDING = new Set(['्', 'ौ', 'ः', 'म्', 'ा', 'े', 'ोः', 'ाम्', 'ि', 'सु', 'षु']);
+// Where these names do denote a sound class (as the Kāśikā reads them). Elsewhere अण् is the taddhita affix aṇ,
+// इण् the root i, कृञ् the root kṛ, अट् the augment aṭ, अम् the case ending or augment am, यञ् the affix yañ,
+// चर्/यम् the roots car/yam, अलम् the particle, शर the reed, आप् the feminine affix, सुट् the augment suṭ,
+// तृन् the affix tṛn, इच् the samāsānta ic, अक/इक/उक the affixes aka/ika/ukañ, and so on.
+const HOMONYM_PRATYAHARAS: Record<string, string[]> = {
+	'अण्': ['1.1.51', '1.1.69', '6.3.111', '7.4.13', '8.4.57'],
+	'अक्': ['6.1.101', '6.1.128'],
+	'इक्': ['1.1.3', '1.1.45', '1.1.48', '1.2.9', '6.1.77', '6.1.127', '6.3.61', '6.3.121', '6.3.123', '6.3.134', '7.1.73', '8.2.76'],
+	'उक्': ['7.3.51'],
+	'इच्': ['6.1.104', '6.3.68', '8.4.31'],
+	'अट्': ['8.3.3', '8.3.9', '8.4.2', '8.4.63'],
+	'इण्': ['8.3.39', '8.3.78'],
+	'अम्': [],
+	'यम्': ['8.4.64'],
+	'यञ्': ['7.3.101'],
+	'अश्': ['8.3.17'],
+	'वश्': ['7.2.8'],
+	'जश्': ['1.1.58', '8.2.39', '8.4.53'],
+	'मय्': ['8.3.33'],
+	'झय्': ['5.4.111', '8.2.10', '8.4.62'],
+	'चर्': ['1.1.58', '8.4.54'],
+	'शर्': ['8.3.28', '8.3.36', '8.3.58', '8.4.49'],
+	'अल्': ['1.1.52', '1.1.65'],
+	'वल्': ['6.1.66'],
+	'आप्': ['7.2.112'],
+	'सुट्': ['1.1.43'],
+	'कृञ्': ['3.1.40'],
+	'तृन्': ['2.3.69'],
+	'तङ्': []
+};
+// Names that mostly denote the class, with the sūtras where they are something else: अच् is also the kṛt/taddhita
+// affix ac (3.1.134, 3.2.9, 3.3.56, 5.2.127, 5.4.75, 5.4.118; and in 2.4.74 यङोऽचि च) and the root añc (6.4.138).
+const NOT_PRATYAHARA: Record<string, string[]> = {
+	'अच्': ['2.4.74', '3.1.134', '3.2.9', '3.3.56', '5.2.127', '5.4.75', '5.4.118', '6.4.138'],
+	'सुप्': ['8.3.88'] // सुपि = a form of the root svap
+};
+// sup and tiṅ affixes as listed in 4.1.2 / 3.4.78, for recognising affix lists
+const AFFIX_NAMES = new Set(['सुँ', 'औ', 'जस्', 'अम्', 'औट्', 'शस्', 'टा', 'भ्याम्', 'भिस्', 'ङे', 'भ्यस्', 'ङसिँ', 'ङस्', 'ओस्', 'आम्', 'ङि', 'सुप्',
+	'तिप्', 'तस्', 'झि', 'सिप्', 'थस्', 'थ', 'मिप्', 'वस्', 'मस्', 'त', 'आताम्', 'झ', 'थास्', 'आथाम्', 'ध्वम्', 'इड्', 'इट्', 'वहि', 'महिङ्']);
+const isAffixName = (w: string) => AFFIX_NAMES.has(w) || [...AFFIX_NAMES].some((a) => a.endsWith('्') && w.startsWith(a.slice(0, -1)) && ANY_CONS_ENDING.has(w.slice(a.length - 1)));
+const CLASS_NAMES = new Set(['सुप्', 'तिङ्']);
+const startsWithVowel = (w: string | undefined) => !!w && /^[अ-औॠॡ]/.test(w);
+
+type MatchCtx = { sutra: string; vib: string; vac: string; final: boolean; next?: string; affixList: boolean };
+function pratyaharaFits(key: string, ending: string, c: MatchCtx): boolean {
+	const stem = key.slice(0, -1);
+	if (stem.length < 2) return false; // र (1.1.51) would otherwise match every रः/रि/रोः, which are the sound r
+	if (HOMONYM_PRATYAHARAS[key] && !HOMONYM_PRATYAHARAS[key].includes(c.sutra)) return false;
+	if (NOT_PRATYAHARA[key]?.includes(c.sutra)) return false;
+	if (c.affixList && !CLASS_NAMES.has(key)) return false;
+	// sandhi can hide the virāma or the visarga before a vowel: हल-आदेः, सुप आत्मनः
+	if (ending === '') return startsWithVowel(c.next);
+	if (!c.final) return ending === '्';
+	if (c.vib === '0' || (ending === 'ः' && c.vib === '1' && c.vac === '1')) return false;
+	return ANY_CONS_ENDING.has(ending);
+}
+
+function matchTerm(part: string, c?: MatchCtx): string | undefined {
+	for (const { key, stem, kind } of termStems) {
+		if (kind === 'pratyahara') {
+			if (!c || !part.startsWith(stem)) continue;
+			const ending = part.slice(stem.length);
+			if ((ending === '' || ENDINGS.has(ending)) && pratyaharaFits(key, ending, c)) return key;
+			continue;
+		}
 		if (stem.length < 2 && part !== key && part.length > stem.length + 3) continue;
 		if (part.startsWith(stem) && ENDINGS.has(part.slice(stem.length))) return key;
 	}
@@ -146,10 +221,16 @@ type Pada = { w: string; iast: string; kind: 'S' | 'T'; vib: string; vac: string
 const termUsage = new Map<string, Set<string>>();
 function parsePc(id: string, pc: string, operational: boolean): Pada[] {
 	const roles = operational ? ROLE_BY_VIBHAKTI : NEUTRAL_ROLE_BY_VIBHAKTI;
-	return pc.split('##').filter(Boolean).map((x) => {
-		const [w, kind = 'S', vib = '', vac = ''] = x.split('$');
+	const padas = pc.split('##').filter(Boolean).map((x) => x.split('$'));
+	return padas.map(([w, kind = 'S', vib = '', vac = ''], pi) => {
 		const role = kind === 'T' ? 'verb' : (roles[vib] ?? 'unknown');
-		const parts = w.split('-').map((p) => ({ w: p, term: matchTerm(p) }));
+		const ws = w.split('-');
+		const affixList = ws.length >= 3 && ws.filter(isAffixName).length * 2 >= ws.length;
+		const parts = ws.map((p, i) => {
+			const final = i === ws.length - 1;
+			const next = final ? padas[pi + 1]?.[0] : ws[i + 1];
+			return { w: p, term: matchTerm(p, { sutra: apnOf(id), vib, vac, final, next, affixList }) };
+		});
 		for (const part of parts) if (part.term) {
 			if (!termUsage.has(part.term)) termUsage.set(part.term, new Set());
 			termUsage.get(part.term)!.add(id);
@@ -254,6 +335,20 @@ ids.forEach((id, idx) => {
 	const g = governs.get(id);
 	full[id].scope = g ? { from: g[0], to: g[g.length - 1], count: g.length } : null;
 });
+
+// Inherited words (anuvṛtti, adhikāra) carry the term their source sūtra tagged, so they get the same hover card.
+// The word is looked up among the source's pada parts; failing that (a different case form), it is matched afresh
+// in the source sūtra's context.
+for (const f of Object.values(full)) {
+	for (const x of [...f.an, ...f.ad] as { w: string; id: string; term?: string }[]) {
+		const src: Pada[] = full[x.id].pc;
+		const term =
+			src.flatMap((p) => p.parts).find((pt) => pt.w === x.w)?.term ??
+			src.find((p) => p.w === x.w && p.parts.length === 1)?.parts[0].term ??
+			(x.w.includes('-') ? undefined : matchTerm(x.w, { sutra: full[x.id].n, vib: '', vac: '', final: true, affixList: false }));
+		if (term) x.term = term;
+	}
+}
 
 const adhikaras = [...governs.entries()]
 	.map(([id, g]) => ({ id, n: apnOf(id), s: byId.get(id)!.s, from: g[0], to: g[g.length - 1], count: g.length, isAD: parseTypes(byId.get(id)!.type).some((t) => t.code === 'AD') }))
