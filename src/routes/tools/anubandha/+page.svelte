@@ -114,7 +114,7 @@
 					<h2>Rule by rule</h2>
 					<ol class="trace">
 						{#each trace.steps as s (s.rule)}
-							<li class="st {s.status}" onpointerenter={() => (hover = s)} onpointerleave={() => (hover = null)}>
+							<li class="st {s.rule === '1.3.4' && s.status === 'fired' ? 'blocked' : s.status}" onpointerenter={() => (hover = s)} onpointerleave={() => (hover = null)}>
 								<span class="code"><ItRuleRef n={s.rule} /></span>
 								<span class="badge">{STATUS[s.status]}{#if s.by}&nbsp;by <ItRuleRef n={s.by} />{/if}</span>
 								<span class="why">{s.why}</span>

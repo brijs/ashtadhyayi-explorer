@@ -11,7 +11,8 @@
 	function pick(i: number) {
 		sel = i;
 		seen.add(i);
-		if (ITEMS[i].name === 'जस्') react('जस्: ज् is a tag by 1.3.7, but the final स् is kept, because 1.3.4 spares t-class, s and m at the end of case endings. That s becomes the ḥ in रामाः.', 'surprised');
+		if (ITEMS[i].name === 'ष्वुन्') react('ष्वुन्: ष् is a tag by 1.3.6 षः प्रत्ययस्य. A ṣ-tagged affix takes ङीष् in the feminine (4.1.41): the Kāśikā gives नर्तकः "dancer", feminine नर्तकी.', 'surprised');
+		else if (ITEMS[i].name === 'जस्') react('जस्: ज् is a tag by 1.3.7, but the final स् is kept, because 1.3.4 spares t-class, s and m at the end of case endings. That s becomes the ḥ in रामाः.', 'surprised');
 		else react(`${ITEMS[i].name}: ${ITEMS[i].segs.filter((s) => s.it).map((s) => `${s.t} by ${s.it}`).join(', ')}.`, 'happy');
 		if (seen.size >= 4) complete();
 	}
@@ -27,13 +28,13 @@
 	<span class="kind">{item.kind}</span>
 	<div class="segs">
 		{#each item.segs as s, i (i)}
-			<div class="seg" class:it={s.it} class:spared={!s.it && s.note}>
+			<div class="seg" class:it={s.it} class:spared={s.kept}>
 				<span class="t deva">{s.t}</span>
 				{#if s.it}
 					<span class="why"><SutraRef n={s.it} s={IT_SUTRAS[s.it]} /></span>
 					<small>{s.note}</small>
-				{:else if s.note}
-					<span class="why"><SutraRef n="1.3.4" s={IT_SUTRAS['1.3.4']} /></span>
+				{:else if s.kept}
+					<span class="why"><SutraRef n={s.kept} s={IT_SUTRAS[s.kept]} /></span>
 					<small>{s.note}</small>
 				{:else}
 					<small>sound</small>
