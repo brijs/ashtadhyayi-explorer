@@ -140,7 +140,7 @@ export const IT_EFFECTS: Record<string, { sutra: string; en: string }[]> = {
 	cit: [{ sutra: '6.1.163', en: 'the word is accented on its last syllable' }],
 	ṭit: [{ sutra: '1.1.46', en: 'an augment marked with ट् attaches at the beginning' }],
 	mit: [{ sutra: '1.1.47', en: 'attaches after the last vowel' }],
-	ṣit: [{ sutra: '4.1.41', en: 'the feminine takes ङीष्' }],
+	ṣit: [{ sutra: '4.1.41', en: 'an affix marked with ष्: the feminine takes ङीष्' }, { sutra: '3.3.104', en: 'a root marked with ष्: action nouns take अङ्' }],
 	idit: [{ sutra: '7.1.58', en: 'the root takes the augment नुँम्' }],
 	īdit: [{ sutra: '7.2.14', en: 'no इट् before the niṣṭhā affixes' }],
 	ādit: [{ sutra: '7.2.16', en: 'no इट् before the niṣṭhā affixes' }],

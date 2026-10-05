@@ -1,0 +1,11 @@
+{
+	"inputs": "The Aṣṭādhyāyī is a rulebook. It says how to build words, but it doesn't list the raw materials. Roots and word lists live in companion texts that its rules point into. Tap three of the companions to see what each one supplies.",
+	"ganas": "The biggest companion is the Dhātupāṭha, the list of roots. It is split into ten classes, or gaṇas, each named after its first root. The class decides which connector goes between root and ending in the present. Tap two classes.",
+	"what-is": "Sūtra 1.3.1 says: bhū and the rest are called dhātu. That means the roots in the list. But 3.1.32 adds that whatever ends in san and the other affixes is also a dhātu, so the grammar can make new roots. Compare the three verbs.",
+	"markers": "Roots are listed in their teaching form, the upadeśa, with extra letters that are not pronounced. These tags tell the rules what to do: which endings to take, which affixes are allowed. Decode three roots.",
+	"krdanta": "Nouns can be built from roots too. Affixes called kṛt attach straight to a root. Then 1.2.46 makes the result a noun stem, a prātipadika. Tap each affix to watch vidyut build the word.",
+	"ganapatha": "The Aṣṭādhyāyī also points into word lists. Sarvādi means sarva and the rest: a list kept in the Gaṇapāṭha. The same ādi trick names classes of roots. Sort each sūtra by the list it points to.",
+	"unadi": "Can every noun be traced back to a verb? Yāska reports a debate: Śākaṭāyana said yes, Gārgya said not all. Pāṇini's sūtra 3.3.1 lets the uṇādi affixes apply variously. Switch between the two ways the tradition treats a word like go.",
+	"claims": "Here are some claims you'll often hear about Pāṇini's word sources. Some hold up; some need correcting. Judge each one, then read what the sources say.",
+	"quiz": "A short quiz to finish. Then try the Dhātupāṭha browser to explore all the roots."
+}
