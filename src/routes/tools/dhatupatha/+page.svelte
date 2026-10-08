@@ -3,6 +3,7 @@
 	import { replaceState } from '$app/navigation';
 	import { resolve } from '$app/paths';
 	import ItWord from '#lib/components/ItWord.svelte';
+	import DhatuUpasargas from '#lib/components/DhatuUpasargas.svelte';
 	import DhatuSenses from '#lib/components/DhatuSenses.svelte';
 	import SutraRef from '#lib/components/SutraRef.svelte';
 	import { loadDhatus, tinantaHash, type Dhatu } from '#lib/vidyut.ts';
@@ -132,7 +133,7 @@
 					<span class="code">{d.c}</span>
 					<span class="up"><ItWord text={d.d} ctx="dhatu" /></span>
 					<span class="nf"><span class="deva">{d.n}</span>{#if settings.iast} <span class="iast">{devaToIast(d.n)}</span>{/if}</span>
-					<span class="m"><DhatuSenses {d} /></span>
+					<span class="m"><DhatuSenses {d} /><DhatuUpasargas code={d.c} root={d.n} /></span>
 					<span class="meta">
 						<span class="deva">{GANA_SA[d.g]}</span>{#if d.ag} · <span class="deva">{ANTAR_SA[d.ag] ?? d.ag}</span>{/if}
 						{#if p}<span class="pd" title={p.label}>{p.short}</span>{/if}

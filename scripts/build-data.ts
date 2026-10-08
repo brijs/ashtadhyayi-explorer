@@ -394,9 +394,15 @@ await vidyutMod.default({ module_or_path: readFileSync(join(wasmDir, 'vidyut_pra
 const vidyut = vidyutMod.Vidyut.init();
 // English and Hindi glosses (ashtadhyayi.com), keyed by the same class.number code as vidyut's list. They are not translations of
 // each other or of the Sanskrit artha: the sources list their own senses, so they often differ.
-const gloss = new Map<string, { artha_english?: string; artha_hindi?: string }>(
+const gloss = new Map<string, { artha_english?: string; artha_hindi?: string; upasargas?: { name: string; artha_hindi?: string }[] }>(
 	(load('dhatu_data.txt').data as { baseindex: string }[]).map((x: any) => [x.baseindex, x])
 );
+// Hindi senses of a root with an upasarga (prefix), e.g. अधि + भू = सत्ता चलाना. Only ~180 roots have them, so they ship as a separate file.
+const upasargas: Record<string, [string, string][]> = {};
+for (const [code, x] of gloss as Map<string, { upasargas?: { name: string; artha_hindi?: string }[] }>) {
+	const us = (x.upasargas ?? []).filter((u) => u.name && u.artha_hindi).map((u) => [u.name.trim(), u.artha_hindi!.replace(/\s+/g, ' ').trim()] as [string, string]);
+	if (us.length) upasargas[code] = us;
+}
 const clean = (t = '') => t.replace(/\s+/g, ' ').trim();
 const dhatus = tsv('dhatupatha')
 	.filter(([code, a]) => GANA[code.slice(0, 2)] && a && a !== '-')
@@ -622,6 +628,7 @@ w(OUT_STATIC, 'meta.json', { sha: readFileSync(join(RAW, '.sha'), 'utf8').trim()
 w(OUT_GEN, 'sutras.full.json', full);
 w(OUT_GEN, 'usage.json', { derivations: usageDerivations, usage });
 w(OUT_STATIC, 'dhatus.json', dhatus);
+w(OUT_STATIC, 'dhatu-upasargas.json', upasargas);
 w(OUT_STATIC, 'vidyut-rules.json', ruleTexts);
 
 const chips = Object.values(full).flatMap((f: any) => f.pc.flatMap((p: Pada) => p.parts));

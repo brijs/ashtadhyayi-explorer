@@ -10,6 +10,7 @@
 	import { slp1ToDeva, toSlp1 } from '#lib/slp1.ts';
 	import SutraRef from '#lib/components/SutraRef.svelte';
 	import DhatuSenses from '#lib/components/DhatuSenses.svelte';
+	import DhatuUpasargas from '#lib/components/DhatuUpasargas.svelte';
 	import DhatuPicker from '#lib/components/prakriya/DhatuPicker.svelte';
 	import StepDebugger from '#lib/components/prakriya/StepDebugger.svelte';
 	import type { CoreSutra } from '#lib/types.ts';
@@ -234,6 +235,7 @@
 							<span class="deva rt">{dhatu.n}</span>
 							<DhatuSenses d={dhatu} inline />
 						</p>
+						<DhatuUpasargas code={dhatu.c} root={dhatu.n} />
 					{/if}
 					<StepDebugger prakriya={current} {sutras} {ruleTexts} />
 				{:else}

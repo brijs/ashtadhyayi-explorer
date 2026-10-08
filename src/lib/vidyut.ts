@@ -27,6 +27,13 @@ export function loadVidyut(): Promise<Wasm> {
 	return wasmP;
 }
 
+/** Hindi senses of roots that take an upasarga: code → [[prefix, meaning], …]. Only ~180 roots have them. */
+let upasargasP: Promise<Record<string, [string, string][]>> | null = null;
+export function loadUpasargas(): Promise<Record<string, [string, string][]>> {
+	upasargasP ??= fetch(asset('data/dhatu-upasargas.json')).then((r) => r.json());
+	return upasargasP;
+}
+
 export function loadDhatus(): Promise<Dhatu[]> {
 	dhatusP ??= fetch(asset('data/dhatus.json')).then((r) => r.json());
 	return dhatusP;
