@@ -9,7 +9,7 @@ FILES=(
   sutraani/data.txt sutraani/sutrartha_english.txt sutraani/vasu_english_summary.txt
   sutraani/vasu_english.txt sutraani/kashika.txt sutraani/kaumudi.txt
   sutraani/sutra_prayogas.txt sutraani/vartika.txt
-  shivasutra/data.txt pratyahara/data.txt
+  shivasutra/data.txt pratyahara/data.txt dhatu/data.txt
 )
 for f in "${FILES[@]}"; do
   out="$DIR/$(echo "$f" | tr / _)"

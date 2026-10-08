@@ -97,7 +97,7 @@ export async function derive(spec: DeriveSpec, extra: DeriveExtra = {}): Promise
 const LOADERS: Record<string, Loader> = {
 	dhatus: async () => {
 		const { order } = getCorpus();
-		const list: { c: string; a: string; d: string; n: string; m: string; g: string; ag: string | null }[] = readStatic('dhatus.json');
+		const list: { c: string; a: string; d: string; n: string; m: string; en: string; hi: string; g: string; ag: string | null }[] = readStatic('dhatus.json');
 		const rules: Record<string, Record<string, string>> = readStatic('vidyut-rules.json');
 		const GANAS = ['Bhvadi', 'Adadi', 'Juhotyadi', 'Divadi', 'Svadi', 'Tudadi', 'Rudhadi', 'Tanadi', 'Kryadi', 'Curadi'];
 		const ganas = await Promise.all(
@@ -106,7 +106,7 @@ const LOADERS: Record<string, Loader> = {
 				const first = roots[0];
 				// parasmaipada where the root allows it, so the vikaraṇa is easy to see (भवति, चोरयति)
 				const ex = await derive({ t: [first.c, first.a, 'Parasmaipada'] }).catch(() => derive({ t: [first.c, first.a] }));
-				return { g, count: roots.length, sample: roots.slice(0, 8).map(({ c, d, m }) => ({ c, d, m })), first: { c: first.c, d: first.d }, form: ex.word, hash: ex.hash, codes: [...new Set(ex.steps.map((st) => st.code))] };
+				return { g, count: roots.length, sample: roots.slice(0, 8).map(({ c, d, m, en, hi }) => ({ c, d, m, en, hi })), first: { c: first.c, d: first.d }, form: ex.word, hash: ex.hash, codes: [...new Set(ex.steps.map((st) => st.code))] };
 			})
 		);
 		const unadiPadas: number[] = [];

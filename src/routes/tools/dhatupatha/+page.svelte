@@ -3,6 +3,7 @@
 	import { replaceState } from '$app/navigation';
 	import { resolve } from '$app/paths';
 	import ItWord from '#lib/components/ItWord.svelte';
+	import DhatuSenses from '#lib/components/DhatuSenses.svelte';
 	import SutraRef from '#lib/components/SutraRef.svelte';
 	import { loadDhatus, tinantaHash, type Dhatu } from '#lib/vidyut.ts';
 	import { looseKey, devaToIast } from '#lib/translit.ts';
@@ -27,7 +28,7 @@
 		dhatus.map((d) => {
 			const units = detectIts(d.d, 'dhatu');
 			const tags = new Set(units.map((_, i) => itName(units, i)).filter((x): x is string => !!x));
-			return { d, tags, k: `${looseKey(d.n)} ${looseKey(d.d)} ${looseKey(d.m)}`, nk: looseKey(d.n), slp: d.a.replace(/[\\^~]/g, '') };
+			return { d, tags, k: `${looseKey(d.n)} ${looseKey(d.d)} ${looseKey(d.m)} ${d.en.toLowerCase()} ${looseKey(d.hi)}`, nk: looseKey(d.n), slp: d.a.replace(/[\\^~]/g, '') };
 		})
 	);
 	const filtered = $derived.by(() => {
@@ -115,7 +116,7 @@
 				</button>
 			{/each}
 		</div>
-		<input class="search" bind:value={q} type="search" placeholder="Search: गम्, gam, gamx, गतौ, 01.1137" aria-label="Search roots" />
+		<input class="search" bind:value={q} type="search" placeholder="Search: गम्, gam, gamx, गतौ, to go, जाना, 01.1137" aria-label="Search roots" />
 	</div>
 
 	{#if failed}
@@ -131,7 +132,7 @@
 					<span class="code">{d.c}</span>
 					<span class="up"><ItWord text={d.d} ctx="dhatu" /></span>
 					<span class="nf"><span class="deva">{d.n}</span>{#if settings.iast} <span class="iast">{devaToIast(d.n)}</span>{/if}</span>
-					<span class="m deva">{d.m}</span>
+					<span class="m"><DhatuSenses {d} /></span>
 					<span class="meta">
 						<span class="deva">{GANA_SA[d.g]}</span>{#if d.ag} · <span class="deva">{ANTAR_SA[d.ag] ?? d.ag}</span>{/if}
 						{#if p}<span class="pd" title={p.label}>{p.short}</span>{/if}
@@ -146,7 +147,7 @@
 	{/if}
 
 	<p class="muted foot">
-		Data: vidyut's Dhātupāṭha (ambuda-org/vidyut), as served by ashtadhyayi.com. Printed editions count roots differently, so you'll see totals near 2,000
+		Data: vidyut's Dhātupāṭha (ambuda-org/vidyut) and the English and Hindi meanings from ashtadhyayi.com. Each language lists its own senses, so they can differ. Printed editions count roots differently, so you'll see totals near 2,000
 		elsewhere. Codes are class.number. P/Ā/U is what the root's own markers predict.
 		{#if ANUBANDHA_TOOL}Decode any upadeśa in the <a href={resolve('/tools') + '/anubandha/'}>it-letter tool</a>.{/if}
 	</p>
@@ -303,7 +304,6 @@
 	.m {
 		font-size: 14.5px;
 		color: var(--ink-2);
-		overflow-wrap: anywhere;
 	}
 	.meta {
 		font-size: 13px;

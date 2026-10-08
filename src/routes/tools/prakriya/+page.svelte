@@ -9,6 +9,7 @@
 	} from '#lib/vidyut.ts';
 	import { slp1ToDeva, toSlp1 } from '#lib/slp1.ts';
 	import SutraRef from '#lib/components/SutraRef.svelte';
+	import DhatuSenses from '#lib/components/DhatuSenses.svelte';
 	import DhatuPicker from '#lib/components/prakriya/DhatuPicker.svelte';
 	import StepDebugger from '#lib/components/prakriya/StepDebugger.svelte';
 	import type { CoreSutra } from '#lib/types.ts';
@@ -228,6 +229,12 @@
 							</div>
 						{/if}
 					</div>
+					{#if mode === 'verb' && dhatu}
+						<p class="root-meaning">
+							<span class="deva rt">{dhatu.n}</span>
+							<DhatuSenses d={dhatu} inline />
+						</p>
+					{/if}
 					<StepDebugger prakriya={current} {sutras} {ruleTexts} />
 				{:else}
 					<p class="muted">No form is derived for this combination.</p>
@@ -248,6 +255,20 @@
 </div>
 
 <style>
+	.root-meaning {
+		display: flex;
+		align-items: baseline;
+		gap: 6px 14px;
+		flex-wrap: wrap;
+		margin: 2px 0 12px;
+		font-size: 14.5px;
+		color: var(--ink-2);
+	}
+	.root-meaning .rt {
+		font-size: 18px;
+		font-weight: 600;
+		color: var(--ink);
+	}
 	.page {
 		padding-top: 32px;
 	}

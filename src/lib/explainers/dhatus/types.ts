@@ -6,7 +6,7 @@ export type Stub = { n: string; s: string; iast: string; en: string };
 export type Gana = {
 	g: string;
 	count: number;
-	sample: { c: string; d: string; m: string }[];
+	sample: { c: string; d: string; m: string; en: string; hi: string }[];
 	first: { c: string; d: string };
 	form: string;
 	hash: string;

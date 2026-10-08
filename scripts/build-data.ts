@@ -392,6 +392,12 @@ const wasmDir = join(ROOT, 'static', 'wasm');
 const vidyutMod = await import(join(wasmDir, 'vidyut_prakriya.js'));
 await vidyutMod.default({ module_or_path: readFileSync(join(wasmDir, 'vidyut_prakriya_bg.wasm')) });
 const vidyut = vidyutMod.Vidyut.init();
+// English and Hindi glosses (ashtadhyayi.com), keyed by the same class.number code as vidyut's list. They are not translations of
+// each other or of the Sanskrit artha: the sources list their own senses, so they often differ.
+const gloss = new Map<string, { artha_english?: string; artha_hindi?: string }>(
+	(load('dhatu_data.txt').data as { baseindex: string }[]).map((x: any) => [x.baseindex, x])
+);
+const clean = (t = '') => t.replace(/\s+/g, ' ').trim();
 const dhatus = tsv('dhatupatha')
 	.filter(([code, a]) => GANA[code.slice(0, 2)] && a && a !== '-')
 	.map(([code, a, artha]) => {
@@ -404,7 +410,7 @@ const dhatus = tsv('dhatupatha')
 			/* leave blank */
 		}
 		if (!normal) fail(`dhātu ${code} ${a}: no normal form`);
-		return { c: code, a, d: slp1ToDeva(a), n: slp1ToDeva(normal), m: slp1ToDeva(artha ?? ''), g: GANA[g], ag };
+		return { c: code, a, d: slp1ToDeva(a), n: slp1ToDeva(normal), m: slp1ToDeva(artha ?? ''), en: clean(gloss.get(code)?.artha_english), hi: clean(gloss.get(code)?.artha_hindi), g: GANA[g], ag };
 	});
 // Sample derivations → for each sūtra, a few live examples that use it (linked from sūtra pages).
 type Example = { w: string; h: string; d: string; steps: number };

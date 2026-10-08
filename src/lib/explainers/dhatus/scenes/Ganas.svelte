@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { resolve } from '$app/paths';
 	import SutraRef from '#lib/components/SutraRef.svelte';
+	import DhatuSenses from '#lib/components/DhatuSenses.svelte';
 	import ItWord from '#lib/components/ItWord.svelte';
 	import type { SceneProps } from '#lib/explainer/types.ts';
 	import { sutra, GANA_SA, GANA_IAST, type DhatuData } from '../types.ts';
@@ -63,7 +64,7 @@
 		<p class="eyebrow">first roots of the class</p>
 		<ul class="roots">
 			{#each g.sample as r (r.c)}
-				<li><span class="code">{r.c}</span> <span class="w"><ItWord text={r.d} ctx="dhatu" /></span> <span class="m deva">{r.m}</span></li>
+				<li><span class="code">{r.c}</span> <span class="w"><ItWord text={r.d} ctx="dhatu" /></span> <span class="m"><DhatuSenses d={r} /></span></li>
 			{/each}
 		</ul>
 		<p class="more"><a href={resolve('/tools') + '/dhatupatha/#' + g.g}>All {g.count} in the Dhātupāṭha browser →</a></p>
@@ -186,9 +187,7 @@
 	.m {
 		font-size: 13px;
 		color: var(--ink-2);
-		overflow: hidden;
-		text-overflow: ellipsis;
-		white-space: nowrap;
+		min-width: 0;
 	}
 	.more {
 		font-size: 14px;

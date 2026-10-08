@@ -1,7 +1,7 @@
 // Browser wrapper around vidyut-prakriya's WebAssembly build (static/wasm, MIT, ambuda-org/vidyut).
 import { asset } from '$app/paths';
 
-export type Dhatu = { c: string; a: string; d: string; n: string; m: string; g: string; ag: string | null };
+export type Dhatu = { c: string; a: string; d: string; n: string; m: string; en: string; hi: string; g: string; ag: string | null };
 export type StepTerm = { text: string; wasChanged: boolean };
 export type Step = { rule: { source: string; code: string }; result: StepTerm[] };
 export type Prakriya = { text: string; history: Step[] };

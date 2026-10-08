@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { looseKey, devaToIast } from '#lib/translit.ts';
 	import { settings } from '#lib/settings.svelte.ts';
+	import DhatuSenses from '#lib/components/DhatuSenses.svelte';
 	import type { Dhatu } from '#lib/vidyut.ts';
 
 	let { dhatus, value, onchange }: { dhatus: Dhatu[]; value: Dhatu | null; onchange: (d: Dhatu) => void } = $props();
@@ -11,7 +12,7 @@
 	};
 	let q = $state('');
 	let open = $state(false);
-	const keyed = $derived(dhatus.map((d) => ({ d, k: `${looseKey(d.n)} ${looseKey(d.d)} ${looseKey(d.m)} ${d.c}` })));
+	const keyed = $derived(dhatus.map((d) => ({ d, k: `${looseKey(d.n)} ${looseKey(d.d)} ${looseKey(d.m)} ${d.en.toLowerCase()} ${looseKey(d.hi)} ${d.c}` })));
 	const results = $derived.by(() => {
 		const t = q.trim();
 		if (!t) return dhatus.slice(0, 40);
@@ -33,7 +34,8 @@
 		{#if value}
 			<span class="n deva">{value.n}</span>
 			<span class="meta">
-				<span class="deva">{value.d} {value.m}</span>
+				<span class="deva">{value.d}</span>
+				<DhatuSenses d={value} />
 				<small>{value.c} · <span class="deva">{GANA_SA[value.g]}</span>{settings.iast ? ` · ${devaToIast(value.n)}` : ''}</small>
 			</span>
 		{:else}
@@ -44,13 +46,13 @@
 	{#if open}
 		<div class="drop card">
 			<!-- svelte-ignore a11y_autofocus -->
-			<input bind:value={q} placeholder="Search root, meaning or code: भू, gam, पाके, 01.0001" aria-label="Search dhātus" autofocus />
+			<input bind:value={q} placeholder="Search root, meaning or code: भू, gam, to cook, पकाना, 01.0001" aria-label="Search dhātus" autofocus />
 			<ul role="listbox" aria-label="Dhātus">
 				{#each results as d (d.c)}
 					<li>
 						<button role="option" aria-selected={value?.c === d.c} onclick={() => pick(d)}>
 							<span class="n deva">{d.n}</span>
-							<span class="deva m">{d.m}</span>
+							<span class="m"><DhatuSenses {d} /></span>
 							<small>{d.c} <span class="deva">{GANA_SA[d.g]}</span></small>
 						</button>
 					</li>
@@ -132,7 +134,7 @@
 	}
 	li button {
 		display: flex;
-		align-items: baseline;
+		align-items: flex-start;
 		gap: 10px;
 		width: 100%;
 		padding: 5px 8px;

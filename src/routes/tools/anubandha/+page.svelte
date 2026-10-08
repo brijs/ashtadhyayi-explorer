@@ -62,7 +62,7 @@
 		const t = q.trim();
 		if (!t) return dhatus.filter((d) => d.d !== d.n).slice(0, 48);
 		const k = looseKey(t);
-		return dhatus.filter((d) => looseKey(d.d).includes(k) || looseKey(d.n).includes(k) || looseKey(d.m).includes(k)).slice(0, 48);
+		return dhatus.filter((d) => looseKey(d.d).includes(k) || looseKey(d.n).includes(k) || looseKey(d.m).includes(k) || d.en.toLowerCase().includes(t.toLowerCase()) || looseKey(d.hi).includes(k)).slice(0, 48);
 	});
 
 	const STATUS: Record<TraceStep['status'], string> = { fired: 'applies', blocked: 'blocked', no: 'does not apply', na: 'not relevant here' };
@@ -161,7 +161,7 @@
 				<p class="muted small">As listed in the Dhātupāṭha, with their markers. {dhatus.length ? `${dhatus.length.toLocaleString()} roots.` : 'Loading…'}</p>
 				<div class="chips">
 					{#each found as d (d.c)}
-						<button class="chip deva" title="{d.n} {d.m} ({d.c})" onclick={() => set(d.d, 'dhatu')}>{d.d}<small>{d.n}</small></button>
+						<button class="chip deva" title="{d.n} · {d.m}{d.en ? ` · ${d.en}` : ''}{d.hi ? ` · ${d.hi}` : ''} ({d.c})" onclick={() => set(d.d, 'dhatu')}>{d.d}<small>{d.n}</small></button>
 					{/each}
 				</div>
 			{:else if tab === 'sup' || tab === 'tin'}
